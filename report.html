@@ -170,9 +170,9 @@
         <button class="key" type="button" data-key="7">7</button>
         <button class="key" type="button" data-key="8">8</button>
         <button class="key" type="button" data-key="9">9</button>
-        <button class="key small" type="button" data-key="clear">C</button>
-        <button class="key" type="button" data-key="0">0</button>
-        <button class="key small" type="button" data-key="back">←</button>
+        <button class="key small" type="button" data-key="0">0</button>
+        <button class="key" type="button" data-key="00">00</button>
+        <button class="key small" type="button" data-key="back">BS</button>
       </div>
     </div>
   </section>
@@ -277,8 +277,8 @@
 
     const k = keyBtn.dataset.key;
     const cur = String(focused.value || "");
-    if (k === "clear") focused.value = "";
-    else if (k === "back") focused.value = cur.slice(0, -1);
+    if (k === "back") focused.value = cur.slice(0, -1);
+    else if (k === "00") focused.value = cur + "00";
     else if (/^[0-9]$/.test(k)) focused.value = cur + k;
     focused.focus();
   });
