@@ -14,6 +14,9 @@
   .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
   .actionBtn{border:2px solid #000;background:#fff;padding:6px 10px;font-weight:900;font-size:14px}
   .empty{padding:24px 0;color:#666;text-align:center}
+  .date-switcher{border:2px solid #000;padding:10px;margin:0 0 12px 0}
+  .date-switcher label{display:block;font-size:13px;color:#666;margin-bottom:6px}
+  .date-switcher select{width:100%;box-sizing:border-box;border:2px solid #000;background:#fff;padding:10px;font-size:16px}
   .tsms-header{
     position:sticky; top:0; z-index:100;
     height:60px; background:#fff;
@@ -82,13 +85,19 @@
 </header>
 <div class="tsms-build"></div>
 
+<section class="date-switcher">
+  <label for="confirmDateSelect">表示日付</label>
+  <select id="confirmDateSelect" aria-label="表示日付"></select>
+</section>
 <div id="cards"></div>
 </div>
 
 <script>
 (function(){
   const KEY = "tsms_reports";
-  let data = [];
+  const CURRENT_DAY_KEY = "tsms_report_current_day";
+  let allData = [];
+  let selectedDayId = "";
 
   function yen(v){
     const n = Number(v || 0);
@@ -103,39 +112,107 @@
       .replaceAll("'","&#39;");
   }
 
-  function load(){
-    try { data = JSON.parse(localStorage.getItem(KEY) || "[]"); }
-    catch (_) { data = []; }
-    if(!Array.isArray(data)) data = [];
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(allData));
   }
 
-  function save(){
-    localStorage.setItem(KEY, JSON.stringify(data));
+  function load(){
+    try { allData = JSON.parse(localStorage.getItem(KEY) || "[]"); }
+    catch (_) { allData = []; }
+    if(!Array.isArray(allData)) allData = [];
+  }
+
+  function fallbackDayIdFromTs(ts){
+    if(!ts) return "";
+    const d = new Date(ts);
+    if(isNaN(d)) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function rowDayId(r){
+    return (r && r.dayId) ? String(r.dayId) : fallbackDayIdFromTs(r && r.ts);
+  }
+
+  function dayLabel(dayId){
+    return String(dayId || "").replace(/-/g, "/");
+  }
+
+  function availableDays(){
+    const set = new Set();
+    allData.forEach((r)=>{
+      const dayId = rowDayId(r);
+      if(dayId) set.add(dayId);
+    });
+    return Array.from(set).sort((a,b)=> b.localeCompare(a));
+  }
+
+  function syncDateSelect(){
+    const sel = document.getElementById("confirmDateSelect");
+    if(!sel) return;
+    const days = availableDays();
+    sel.innerHTML = "";
+
+    if(!days.length){
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "保存済みデータなし";
+      sel.appendChild(opt);
+      sel.disabled = true;
+      selectedDayId = "";
+      return;
+    }
+
+    days.forEach((dayId)=>{
+      const opt = document.createElement("option");
+      opt.value = dayId;
+      opt.textContent = dayLabel(dayId);
+      sel.appendChild(opt);
+    });
+
+    const currentDay = localStorage.getItem(CURRENT_DAY_KEY) || "";
+    const picked = [selectedDayId, currentDay, days[0]].find((v)=> v && days.includes(v)) || days[0];
+    selectedDayId = picked;
+    sel.value = picked;
+    sel.disabled = false;
+  }
+
+  function filteredDataWithIndex(){
+    const out = [];
+    allData.forEach((r, idx)=>{
+      if(rowDayId(r) === selectedDayId){
+        out.push({ row: r, idx });
+      }
+    });
+    return out;
   }
 
   function render(){
     const root = document.getElementById("cards");
     if(!root) return;
 
-    if(data.length === 0){
-      root.innerHTML = '<div class="empty">データがありません</div>';
+    const rows = filteredDataWithIndex();
+    if(rows.length === 0){
+      root.innerHTML = '<div class="empty">この日付のデータがありません</div>';
       return;
     }
 
     root.innerHTML = "";
-    data.forEach((r, idx)=>{
+    rows.forEach(({row:r, idx})=>{
       const card = document.createElement("div");
       card.className = "card";
-      const rows = [];
-      rows.push(`<div class="row"><span class="label">時間</span><span>${esc(r.time||"")}</span></div>`);
-      rows.push(`<div class="row"><span class="label">乗車種別</span><span>${esc(r.rideType||"")}</span></div>`);
-      rows.push(`<div class="row"><span class="label">支払い方法</span><span>${esc(r.payMethod||"")}</span></div>`);
-      if(r.ticketSub) rows.push(`<div class="row"><span class="label">チケット区分</span><span>${esc(r.ticketSub)}</span></div>`);
-      if(Number(r.cash||0) > 0) rows.push(`<div class="row"><span class="label">現収</span><span>${esc(yen(r.cash))}</span></div>`);
-      if(Number(r.credit||0) > 0) rows.push(`<div class="row"><span class="label">未収</span><span>${esc(yen(r.credit))}</span></div>`);
-      if(r.note) rows.push(`<div class="note">${esc(r.note)}</div>`);
+      const lines = [];
+      lines.push(`<div class="row"><span class="label">時間</span><span>${esc(r.time||"")}</span></div>`);
+      lines.push(`<div class="row"><span class="label">乗車種別</span><span>${esc(r.rideType||"")}</span></div>`);
+      lines.push(`<div class="row"><span class="label">支払い方法</span><span>${esc(r.payMethod||"")}</span></div>`);
+      if(r.ticketSub) lines.push(`<div class="row"><span class="label">チケット区分</span><span>${esc(r.ticketSub)}</span></div>`);
+      if(Number(r.cash||0) > 0) lines.push(`<div class="row"><span class="label">現収</span><span>${esc(yen(r.cash))}</span></div>`);
+      if(Number(r.credit||0) > 0) lines.push(`<div class="row"><span class="label">未収</span><span>${esc(yen(r.credit))}</span></div>`);
+      if(r.note) lines.push(`<div class="note">${esc(r.note)}</div>`);
 
-      card.innerHTML = rows.join("\n") + `
+      card.innerHTML = lines.join("\n") + `
         <div class="actions">
           <button type="button" class="actionBtn" data-action="edit" data-idx="${idx}">修正</button>
           <button type="button" class="actionBtn" data-action="delete" data-idx="${idx}">削除</button>
@@ -150,18 +227,19 @@
 
     const action = btn.dataset.action;
     const idx = Number(btn.dataset.idx);
-    if(Number.isNaN(idx) || !data[idx]) return;
+    if(Number.isNaN(idx) || !allData[idx]) return;
 
     if(action === "delete"){
       if(!confirm("削除してよろしいですか？")) return;
-      data.splice(idx, 1);
+      allData.splice(idx, 1);
       save();
+      syncDateSelect();
       render();
       return;
     }
 
     if(action === "edit"){
-      const id = data[idx].id;
+      const id = allData[idx].id;
       if(!id){
         alert("編集対象のIDがありません");
         return;
@@ -170,7 +248,16 @@
     }
   });
 
+  const sel = document.getElementById("confirmDateSelect");
+  if(sel){
+    sel.addEventListener("change", ()=>{
+      selectedDayId = sel.value || "";
+      render();
+    });
+  }
+
   load();
+  syncDateSelect();
   render();
 })();
 </script>

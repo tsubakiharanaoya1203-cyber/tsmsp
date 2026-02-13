@@ -180,6 +180,8 @@
 
 <script>
 (() => {
+  const REPORT_KEY = "tsms_reports";
+  const CURRENT_DAY_KEY = "tsms_report_current_day";
   const state = { rideType: "", payMethod: "", ticketSub: "" };
   const secTicket = document.getElementById("sec_ticketSub");
   const secAmounts = document.getElementById("sec_amounts");
@@ -191,6 +193,31 @@
   const btnClear = document.getElementById("btn_clear");
   const btnSubmit = document.getElementById("btn_submit");
   let focused = inCash;
+
+  function todayLocalYmd() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function loadReports() {
+    try {
+      const list = JSON.parse(localStorage.getItem(REPORT_KEY) || "[]");
+      return Array.isArray(list) ? list : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function getCurrentDayId() {
+    return localStorage.getItem(CURRENT_DAY_KEY) || "";
+  }
+
+  function resolveSaveDayId() {
+    return getCurrentDayId() || todayLocalYmd();
+  }
 
   function clearSelected(group) {
     document.querySelectorAll(`button[data-group="${group}"]`).forEach((b) => b.classList.remove("is-selected"));
@@ -321,14 +348,14 @@
       ticketSub: state.ticketSub || "",
       cash: cash ? Number(cash.replace(/[^0-9]/g, "")) : 0,
       credit: credit ? Number(credit.replace(/[^0-9]/g, "")) : 0,
-      note: (inNote.value || "").trim()
+      note: (inNote.value || "").trim(),
+      dayId: resolveSaveDayId()
     };
 
     const params = new URLSearchParams(location.search);
     const editId = params.get("edit");
 
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch (_) { list = []; }
+    let list = loadReports();
 
     if (editId) {
       const idx = list.findIndex((x) => x.id === editId);
@@ -342,7 +369,7 @@
       list.unshift(entry);
     }
 
-    localStorage.setItem("tsms_reports", JSON.stringify(list));
+    localStorage.setItem(REPORT_KEY, JSON.stringify(list));
     location.href = "confirm.html";
   });
 
@@ -354,8 +381,7 @@
       return;
     }
 
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch (_) { list = []; }
+    let list = loadReports();
     const entry = list.find((x) => x.id === editId);
     if (!entry) {
       applyPayRules();
