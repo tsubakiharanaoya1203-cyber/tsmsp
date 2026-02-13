@@ -155,12 +155,12 @@
       <div class="wf-form">
         <div class="wf-field" id="row_cash">
           <div class="wf-field-label">現収（数字のみ）</div>
-          <input class="input" id="in_cash" inputmode="numeric" placeholder="0">
+          <input class="input" id="in_cash" inputmode="none" placeholder="0" readonly aria-readonly="true">
         </div>
 
         <div class="wf-field" id="row_credit">
           <div class="wf-field-label">未収（数字のみ）</div>
-          <input class="input" id="in_credit" inputmode="numeric" placeholder="0">
+          <input class="input" id="in_credit" inputmode="none" placeholder="0" readonly aria-readonly="true">
         </div>
 
         <div class="wf-field">
@@ -186,9 +186,9 @@
           <button class="key" type="button" data-key="7">7</button>
           <button class="key" type="button" data-key="8">8</button>
           <button class="key" type="button" data-key="9">9</button>
-          <button class="key small" type="button" data-key="clear">C</button>
           <button class="key" type="button" data-key="0">0</button>
-          <button class="key small" type="button" data-key="back">←</button>
+          <button class="key small" type="button" data-key="00">00</button>
+          <button class="key small" type="button" data-key="back">BS</button>
         </div>
       </div>
     </section>
@@ -280,13 +280,14 @@ if(btn){
 }
 
 
+      // keypad inputs (0 / 00 / BS)
       const keyBtn = e.target.closest("button[data-key]");
       if(keyBtn){
         const k = keyBtn.dataset.key;
         if(!focused) return;
         const cur = String(focused.value||"");
-        if(k === "clear") focused.value = "";
-        else if(k === "back") focused.value = cur.slice(0,-1);
+        if(k === "back") focused.value = cur.slice(0,-1);
+        else if(k === "00") focused.value = cur + "00";
         else if(/^[0-9]$/.test(k)) focused.value = cur + k;
         focused.focus();
         return;
