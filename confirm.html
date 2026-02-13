@@ -13,47 +13,46 @@
   .note{margin-top:6px;font-size:14px}
   .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
   .actionBtn{border:2px solid #000;background:#fff;padding:6px 10px;font-weight:900;font-size:14px}
-  /* ---- TSMS Hamburger Menu (overlay) ---- */
-.tsms-header{
-  position:sticky; top:0; z-index:100;
-  height:60px; background:#fff;
-  border-bottom:2px solid #000;
-  display:flex; align-items:center;
-  padding:0 14px 0 56px;
-  font-weight:900; font-size:20px;
-}
-.tsms-hamburger{
-  position:absolute; left:14px; top:50%;
-  transform:translateY(-50%);
-  width:32px; height:24px;
-  display:flex; flex-direction:column; justify-content:space-between;
-  cursor:pointer; user-select:none;
-}
-.tsms-hamburger span{ height:3px; background:#000; display:block; }
-.tsms-menu{
-  position:fixed; top:0; left:0; height:100%; width:280px;
-  background:#fff; border-right:2px solid #000;
-  transform:translateX(-100%);
-  transition:transform .25s ease;
-  z-index:1000; padding-top:60px;
-}
-.tsms-menu.open{ transform:translateX(0); }
-.tsms-menu a{
-  display:block; padding:16px;
-  border-bottom:1px solid #ddd;
-  text-decoration:none; color:#000;
-  font-size:18px; font-weight:900;
-}
-.tsms-menu-bg{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.25);
-  opacity:0; pointer-events:none;
-  transition:opacity .2s ease;
-  z-index:900;
-}
-.tsms-menu-bg.show{ opacity:1; pointer-events:auto; }
-.tsms-build{ font-size:12px; color:#666; padding:8px 12px; }
-/* -------------------------------------- */
+  .empty{padding:24px 0;color:#666;text-align:center}
+  .tsms-header{
+    position:sticky; top:0; z-index:100;
+    height:60px; background:#fff;
+    border-bottom:2px solid #000;
+    display:flex; align-items:center;
+    padding:0 14px 0 56px;
+    font-weight:900; font-size:20px;
+  }
+  .tsms-hamburger{
+    position:absolute; left:14px; top:50%;
+    transform:translateY(-50%);
+    width:32px; height:24px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    cursor:pointer; user-select:none;
+  }
+  .tsms-hamburger span{ height:3px; background:#000; display:block; }
+  .tsms-menu{
+    position:fixed; top:0; left:0; height:100%; width:280px;
+    background:#fff; border-right:2px solid #000;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    z-index:1000; padding-top:60px;
+  }
+  .tsms-menu.open{ transform:translateX(0); }
+  .tsms-menu a{
+    display:block; padding:16px;
+    border-bottom:1px solid #ddd;
+    text-decoration:none; color:#000;
+    font-size:18px; font-weight:900;
+  }
+  .tsms-menu-bg{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.25);
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+    z-index:900;
+  }
+  .tsms-menu-bg.show{ opacity:1; pointer-events:auto; }
+  .tsms-build{ font-size:12px; color:#666; padding:8px 12px; }
 </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
@@ -87,13 +86,13 @@
 </div>
 
 <script>
-/* Confirm minimal (file:// OK) : render + delete confirm + edit navigate */
 (function(){
+  const KEY = "tsms_reports";
   let data = [];
 
   function yen(v){
-    const n = String(v||"").replace(/[^\d]/g,"");
-    return n ? Number(n).toLocaleString("ja-JP")+"円" : "0円";
+    const n = Number(v || 0);
+    return n.toLocaleString("ja-JP") + "円";
   }
   function esc(s){
     return String(s||"")
@@ -103,15 +102,26 @@
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#39;");
   }
-  function encodeRecord(rec){
-    // pass record via querystring (no storage)
-    const json = JSON.stringify(rec);
-    return encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
+
+  function load(){
+    try { data = JSON.parse(localStorage.getItem(KEY) || "[]"); }
+    catch (_) { data = []; }
+    if(!Array.isArray(data)) data = [];
+  }
+
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(data));
   }
 
   function render(){
     const root = document.getElementById("cards");
     if(!root) return;
+
+    if(data.length === 0){
+      root.innerHTML = '<div class="empty">データがありません</div>';
+      return;
+    }
+
     root.innerHTML = "";
     data.forEach((r, idx)=>{
       const card = document.createElement("div");
@@ -120,8 +130,9 @@
       rows.push(`<div class="row"><span class="label">時間</span><span>${esc(r.time||"")}</span></div>`);
       rows.push(`<div class="row"><span class="label">乗車種別</span><span>${esc(r.rideType||"")}</span></div>`);
       rows.push(`<div class="row"><span class="label">支払い方法</span><span>${esc(r.payMethod||"")}</span></div>`);
-      if(r.cash) rows.push(`<div class="row"><span class="label">現収</span><span>${esc(yen(r.cash))}</span></div>`);
-      if(r.credit) rows.push(`<div class="row"><span class="label">未収</span><span>${esc(yen(r.credit))}</span></div>`);
+      if(r.ticketSub) rows.push(`<div class="row"><span class="label">チケット区分</span><span>${esc(r.ticketSub)}</span></div>`);
+      if(Number(r.cash||0) > 0) rows.push(`<div class="row"><span class="label">現収</span><span>${esc(yen(r.cash))}</span></div>`);
+      if(Number(r.credit||0) > 0) rows.push(`<div class="row"><span class="label">未収</span><span>${esc(yen(r.credit))}</span></div>`);
       if(r.note) rows.push(`<div class="note">${esc(r.note)}</div>`);
 
       card.innerHTML = rows.join("\n") + `
@@ -136,26 +147,30 @@
   document.addEventListener("click", (e)=>{
     const btn = e.target.closest("button.actionBtn");
     if(!btn) return;
+
     const action = btn.dataset.action;
     const idx = Number(btn.dataset.idx);
     if(Number.isNaN(idx) || !data[idx]) return;
 
     if(action === "delete"){
-      const ok = confirm("削除してよろしいですか？\n\nいいえ = キャンセル\nはい = OK");
-      if(!ok) return;
+      if(!confirm("削除してよろしいですか？")) return;
       data.splice(idx, 1);
+      save();
       render();
       return;
     }
 
     if(action === "edit"){
-      // report側が対応していれば、同じデータを表示できる
-      const q = encodeRecord(data[idx]);
-      location.href = "report.html?edit=1&data=" + q;
-      return;
+      const id = data[idx].id;
+      if(!id){
+        alert("編集対象のIDがありません");
+        return;
+      }
+      location.href = `report.html?edit=${encodeURIComponent(id)}`;
     }
-  }, true);
+  });
 
+  load();
   render();
 })();
 </script>
@@ -173,13 +188,13 @@
   burger.addEventListener("click", openMenu);
   burger.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" ") openMenu(); });
   bg.addEventListener("click", closeMenu);
-  menu.querySelectorAll("a").forEach(a=>a.addEventListener("click", closeMenu));
+  menu.querySelectorAll("a").forEach((a)=>a.addEventListener("click", closeMenu));
 })();
 </script>
 
-  <script>
-    (function(){if('serviceWorker'in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();
-  </script>
+<script>
+  (function(){if('serviceWorker'in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();
+</script>
 
 </body>
 </html>
