@@ -83,6 +83,11 @@ html,body{
 .btn.wide{ grid-column:1 / -1; }
 .btn.danger{ border-color:#333; }
 .btn:disabled{ opacity:.45; }
+.btn.next{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
 
 .pill{ border:2px solid var(--border); padding:4px 8px; font-size:12px; font-weight:800; display:inline-block; }
 
@@ -296,8 +301,20 @@ function render(){
   }
 
   // buttons state
+  const departMs = d.departAt ? new Date(d.departAt).getTime() : NaN;
+  const returnMs = d.returnAt ? new Date(d.returnAt).getTime() : NaN;
+  const running = !isNaN(departMs) && (isNaN(returnMs) || departMs >= returnMs);
+
+  btnDepart.disabled = running;
+  btnReturn.disabled = !running;
+
   btnBreakStart.disabled = d.breakActive;
   btnBreakEnd.disabled = !d.breakActive;
+
+  btnDepart.classList.toggle("next", !running);
+  btnReturn.classList.toggle("next", running);
+  btnBreakStart.classList.toggle("next", !d.breakActive);
+  btnBreakEnd.classList.toggle("next", d.breakActive);
 
   // list
   const sessions = d.breakSessions || [];
