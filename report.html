@@ -309,6 +309,22 @@ if(btn){
       focused = inCash;
     });
 
+    function isDepartStarted(){
+      try{
+        const ops = JSON.parse(localStorage.getItem("ops") || "null");
+        return !!(ops && ops.departAt);
+      }catch(e){
+        return false;
+      }
+    }
+
+    function buildNoteWithTestMode(rawNote){
+      const note = (rawNote||"").trim();
+      if(isDepartStarted()) return note;
+      if(note.includes("テストモード")) return note;
+      return note ? `テストモード ${note}` : "テストモード";
+    }
+
     document.getElementById("btn_submit").addEventListener("click", ()=>{
       // --- Save to localStorage (for GitHub Pages review) ---
       if(!state.rideType || !state.payMethod){
@@ -337,7 +353,7 @@ if(btn){
         ticketSub: state.ticketSub || "",
         cash: cash ? Number(cash.replace(/[^0-9]/g,"")) : 0,
         credit: credit ? Number(credit.replace(/[^0-9]/g,"")) : 0,
-        note: (inNote.value||"").trim()
+        note: buildNoteWithTestMode(inNote.value)
       };
 
       const params = new URLSearchParams(location.search);
