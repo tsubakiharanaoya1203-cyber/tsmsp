@@ -64,7 +64,7 @@ html,body{
 .container{ padding:14px; }
 .grid{
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:repeat(2, 1fr);
   gap:12px;
 }
 a.tile{
@@ -81,6 +81,10 @@ a.tile:active{ transform:translateY(1px); }
 .footer{
   padding:10px 14px 18px;
   font-size:12px; color:#666;
+}
+
+@media (min-width:520px){
+  .grid{ grid-template-columns:repeat(3, 1fr); }
 }
 
 @media (min-width:768px){
@@ -109,7 +113,7 @@ a.tile:active{ transform:translateY(1px); }
 <div class="menu-bg" id="menuBg" aria-hidden="true"></div>
 
 <header class="header">
-  <div class="hamburger" id="hamburger" aria-label="メニュー" role="button" tabindex="0">
+  <div class="hamburger" id="hamburger" aria-label="メニュー" aria-expanded="false" role="button" tabindex="0">
     <span></span><span></span><span></span>
   </div>
   TSMS
@@ -125,13 +129,10 @@ a.tile:active{ transform:translateY(1px); }
     <a class="tile" href="sales.html">売上</a>
     <a class="tile" href="settings.html">設定</a>
 
-    <a class="tile" href="report.html">予備</a>
-    <a class="tile" href="report.html">予備</a>
-    <a class="tile" href="report.html">予備</a>
   </section>
 </main>
 
-<div class="footer">build 2026-02-11 10:29:46</div>
+<div class="footer">build 2026-02-13 16:20:00</div>
 
 <script>
 const menu = document.getElementById("menu");
@@ -141,15 +142,30 @@ const burger = document.getElementById("hamburger");
 function openMenu(){
   menu.classList.add("open");
   bg.classList.add("show");
+  burger.setAttribute("aria-expanded", "true");
 }
 function closeMenu(){
   menu.classList.remove("open");
   bg.classList.remove("show");
+  burger.setAttribute("aria-expanded", "false");
+}
+function toggleMenu(){
+  if(menu.classList.contains("open")){
+    closeMenu();
+    return;
+  }
+  openMenu();
 }
 
-burger.addEventListener("click", openMenu);
-burger.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" ") openMenu(); });
+burger.addEventListener("click", toggleMenu);
+burger.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter"||e.key===" "){
+    e.preventDefault();
+    toggleMenu();
+  }
+});
 bg.addEventListener("click", closeMenu);
+window.addEventListener("keydown", (e)=>{ if(e.key === "Escape") closeMenu(); });
 
 // close on link tap (mobile)
 menu.querySelectorAll("a").forEach(a=>a.addEventListener("click", closeMenu));
