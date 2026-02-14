@@ -3,364 +3,318 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>売上（準備中）</title>
+  <title>月次売上</title>
   <style>
-    :root{
-      --bg:#fff; --text:#111; --muted:#666; --border:#999;
-    }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
-      font-size:18px;
-    }
-    .app-header{position:sticky;top:0;background:#fff;border-bottom:2px solid var(--border);padding:12px 14px;z-index:10;}
-    .app-header h1{margin:0;font-size:20px;}
-    .main{padding:12px;}
-    .note{font-size:13px;color:var(--muted);line-height:1.35;margin:8px 0;}
-    /* Excel-ish panels */
-    .wf-panel{border:2px solid var(--border);background:#fff;margin:10px 0;padding:10px;}
-    .wf-label{font-weight:800;font-size:16px;margin:0 0 8px 0;}
-    .wf-subnote{font-size:12px;color:var(--muted);margin:-2px 0 8px 0;}
-    /* Square buttons (no rounding) */
-    .wf-row{display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;}
-    .btn{appearance:none;-webkit-appearance:none;border:2px solid var(--border);background:#fff;
-      border-radius:0;padding:14px 8px;font-size:16px;min-height:56px;
-    }
-    .btn.is-selected{border:4px solid #00ff00;}
-    .wf-form{display:grid;gap:10px;}
-    .wf-field{display:grid;gap:6px;}
-    .wf-field-label{font-size:13px;color:var(--muted);}
-    .input{width:100%;box-sizing:border-box;border:2px solid var(--border);border-radius:0;
-      padding:14px 10px;font-size:20px;min-height:56px;background:#fff;
-    }
-    .wf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
-    .is-hidden{display:none !important;}
-    /* Keypad 3x3 + bottom row */
-    .keypad{margin-top:10px;border-top:2px solid var(--border);padding-top:10px;}
-    .keypad-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}
-    .key{border:2px solid var(--border);border-radius:0;background:#fff;
-      min-height:60px;font-size:22px;
-    }
-    .key.small{font-size:16px;}
-    @media (max-width: 420px){
-      .wf-row{grid-template-columns:repeat(4, 1fr);}
-      .btn{font-size:15px;min-height:52px;padding:12px 6px;}
-    }
-    @media (min-width: 768px){
-      html{font-size:20px;}
-      .main{max-width:880px;margin:0 auto;}
-      .btn{font-size:18px;min-height:64px;}
-      .input{font-size:22px;min-height:64px;}
-      .key{min-height:72px;font-size:26px;}
-    }
-  
-/* ---- TSMS Hamburger Menu (overlay) ---- */
-.tsms-header{
-  position:sticky; top:0; z-index:100;
-  height:60px; background:#fff;
-  border-bottom:2px solid #000;
-  display:flex; align-items:center;
-  padding:0 14px 0 56px;
-  font-weight:900; font-size:20px;
-}
-.tsms-hamburger{
-  position:absolute; left:14px; top:50%;
-  transform:translateY(-50%);
-  width:32px; height:24px;
-  display:flex; flex-direction:column; justify-content:space-between;
-  cursor:pointer; user-select:none;
-}
-.tsms-hamburger span{ height:3px; background:#000; display:block; }
-.tsms-menu{
-  position:fixed; top:0; left:0; height:100%; width:280px;
-  background:#fff; border-right:2px solid #000;
-  transform:translateX(-100%);
-  transition:transform .25s ease;
-  z-index:1000; padding-top:60px;
-}
-.tsms-menu.open{ transform:translateX(0); }
-.tsms-menu a{
-  display:block; padding:16px;
-  border-bottom:1px solid #ddd;
-  text-decoration:none; color:#000;
-  font-size:18px; font-weight:900;
-}
-.tsms-menu-bg{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.25);
-  opacity:0; pointer-events:none;
-  transition:opacity .2s ease;
-  z-index:900;
-}
-.tsms-menu-bg.show{ opacity:1; pointer-events:auto; }
-.tsms-build{ font-size:12px; color:#666; padding:8px 12px; }
-/* -------------------------------------- */
+    :root{ --bg:#fff; --text:#111; --muted:#666; --border:#999; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"Noto Sans JP", sans-serif;font-size:16px;}
+    .main{padding:10px;max-width:980px;margin:0 auto;}
+    .panel{border:2px solid var(--border);background:#fff;margin:8px 0;padding:8px;}
+    .label{font-size:12px;color:var(--muted);margin:0 0 4px 0;}
+    .input{width:100%;box-sizing:border-box;border:2px solid var(--border);padding:10px 8px;font-size:18px;background:#fff;color:inherit;}
 
-</style>
+    .tsms-header{position:sticky; top:0; z-index:100;height:60px; background:#fff;border-bottom:2px solid #000;display:flex; align-items:center;padding:0 14px 0 56px;font-weight:900; font-size:20px;}
+    .header-to-report{margin-left:auto;border:2px solid #000;padding:6px 10px;font-size:14px;font-weight:900;color:#000;text-decoration:none;line-height:1.2;background:#fff;}
+    .tsms-hamburger{position:absolute; left:14px; top:50%;transform:translateY(-50%);width:32px; height:24px;display:flex; flex-direction:column; justify-content:space-between;cursor:pointer; user-select:none;}
+    .tsms-hamburger span{ height:3px; background:#000; display:block; }
+    .tsms-menu{position:fixed; top:0; left:0; height:100%; width:280px;background:#fff; border-right:2px solid #000;transform:translateX(-100%);transition:transform .25s ease;z-index:1000; padding-top:60px;}
+    .tsms-menu.open{ transform:translateX(0); }
+    .tsms-menu a{display:block; padding:16px;border-bottom:1px solid #ddd;text-decoration:none; color:#000;font-size:18px; font-weight:900;}
+    .tsms-menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
+    .tsms-menu-bg{position:fixed; inset:0;background:rgba(0,0,0,.25);opacity:0; pointer-events:none;transition:opacity .2s ease;z-index:900;}
+    .tsms-menu-bg.show{ opacity:1; pointer-events:auto; }
+
+    .table-wrap{border:2px solid var(--border);overflow:hidden;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px;}
+    th,td{border:1px dashed var(--border);padding:4px 2px;text-align:center;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    th{background:var(--surface-2);font-weight:900;}
+    td.date.sat{background:#e8f6ff;}
+    td.date.sun{background:#ffecec;}
+    .sum-row td{background:#55cad8;font-weight:900;border:2px solid var(--border);}
+
+    .shift-btn{appearance:none;border:none;color:#fff;font-weight:900;border-radius:6px;padding:4px 2px;min-height:28px;width:100%;font-size:11px;}
+    .s-work{background:#1c9b2d;}
+    .s-holiday{background:#f0ad00;color:#1d1d1d;}
+    .s-absence{background:#d64545;}
+    .s-part{background:#187FBF;}
+
+    .target-input{width:100%;box-sizing:border-box;border:1px solid var(--border);padding:3px 2px;font-size:11px;text-align:right;background:var(--surface-1);color:inherit;}
+    td.muted, .muted .target-input{background:#e2e8ee !important;color:#6a7582 !important;}
+
+    /* ---- Theme tokens ---- */
+    :root{--bg:#F3F6F8;--surface-1:#FFFFFF;--surface-2:#EEF3F6;--border:#D5DEE6;--text-primary:#0F1720;--text-secondary:#344554;--text-muted:#5B6D7C;--accent:#2580ED;--accent-hover:#4DA3FF;--link:#187FBF;}
+    :root[data-theme="dark"]{--bg:#0F1417;--surface-1:#151C20;--surface-2:#1B242A;--border:#2A353D;--text-primary:#E6EEF3;--text-secondary:#B7C4CC;--text-muted:#8A949A;--accent:#3B95F0;--accent-hover:#4DA3FF;--link:#58C2FF;}
+    html,body{ background:var(--bg)!important; color:var(--text-primary)!important; }
+    a{ color:var(--link); }
+    .tsms-header,.header,.app-header,.card,.wf-panel,.section,.date-switcher,.menu,.tsms-menu,.box,.panel{background:var(--surface-1)!important;border-color:var(--border)!important;color:var(--text-primary)!important;}
+    .note,.wf-field-label,.label,.k,.idx,.desc,.wf-subnote,.wf-field-label{color:var(--text-muted)!important;}
+    .tsms-menu a,.menu a,.header-to-report,.btn,.actionBtn,.key,.input,select,.key.small{background:var(--surface-2)!important;color:var(--text-primary)!important;border-color:var(--border)!important;}
+    .menu small,.tsms-menu small{color:var(--text-muted)!important;}
+    .menu-bg,.tsms-menu-bg{background:rgba(15,23,32,.35)!important;}
+    .hamburger span,.tsms-hamburger span{background:#58C2FF!important;}
+    /* ---- Theme tokens end ---- */
+  </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="TSMS">
-
+  <script>(function(){try{var t=localStorage.getItem("tsms_theme")==="dark"?"dark":"light";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#0F1417":"#F3F6F8");}catch(e){}})();</script>
 </head>
 <body>
-
 <nav class="tsms-menu" id="tsmsMenu" aria-label="サイドメニュー">
-  <a href="index.html">TOP</a>
-  <a href="report.html">日報入力</a>
-  <a href="confirm.html">入力確認</a>
-  <a href="detail.html">詳細確認</a>
-  <a href="ops.html">出庫/帰庫/休憩</a>
-  <a href="sales.html">売上</a>
-  <a href="settings.html">設定</a>
+  <a href="index.html">TOP<small>メニュー一覧</small></a>
+  <a href="report.html">日報入力<small>乗車データを入力</small></a>
+  <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
+  <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
+  <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="tsms-menu-bg" id="tsmsMenuBg" aria-hidden="true"></div>
 
 <header class="tsms-header">
-  <div class="tsms-hamburger" id="tsmsHamburger" role="button" tabindex="0" aria-label="メニュー">
-    <span></span><span></span><span></span>
-  </div>
-  売上
+  <div class="tsms-hamburger" id="tsmsHamburger" role="button" tabindex="0" aria-label="メニュー"><span></span><span></span><span></span></div>
+  月次売上
+  <a class="header-to-report" href="report.html">入力画面へ</a>
 </header>
-<div class="tsms-build"></div>
-  </header>
 
-  <main class="main">
-  <section class="wf-panel">
-    <div class="wf-label">売上</div>
-    <div class="note">このページは準備中です。</div>
-    <div class="wf-actions">
-      <a class="btn" href="index.html" style="display:inline-block;text-decoration:none;line-height:44px;text-align:center;">TOPへ戻る</a>
-      <a class="btn" href="report.html" style="display:inline-block;text-decoration:none;line-height:44px;text-align:center;">日報入力へ</a>
-    </div>
+<main class="main">
+  <section class="panel">
+    <div class="label">表示月（締め期間）</div>
+    <select class="input" id="monthSelect"></select>
+  </section>
+
+  <section class="table-wrap">
+    <table>
+      <thead>
+      <tr>
+        <th style="width:12%;">シフト</th>
+        <th style="width:14%;">日付</th>
+        <th style="width:12%;">目標</th>
+        <th style="width:12%;">結果</th>
+        <th style="width:12%;">対目標</th>
+        <th style="width:10%;">出庫</th>
+        <th style="width:12%;">実働</th>
+        <th style="width:8%;">休憩</th>
+        <th style="width:8%;">時給</th>
+      </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+      <tfoot>
+      <tr class="sum-row" id="sumRow">
+        <td colspan="2">合計</td>
+        <td id="sumTarget">0</td>
+        <td id="sumResult">0</td>
+        <td id="sumDiff">0</td>
+        <td>-</td>
+        <td id="sumWork">0:00</td>
+        <td id="sumBreak">0:00</td>
+        <td id="sumHour">0</td>
+      </tr>
+      </tfoot>
+    </table>
   </section>
 </main>
 
+<script>
+(function(){
+  const REPORT_KEY='tsms_reports';
+  const OPS_KEY='ops';
+  const SETTINGS_KEY='tsms_settings';
+  const PLAN_KEY='tsms_sales_plan';
+  const SHIFT_ORDER=['work','holiday','absence','part'];
+  const SHIFT_LABEL={work:'出勤',holiday:'休日',absence:'欠勤',part:'バイト'};
+  const SHIFT_CLASS={work:'s-work',holiday:'s-holiday',absence:'s-absence',part:'s-part'};
 
-  <script>
-    // ===== Rules + keypad (self-contained) =====
-    const state = {rideType:"", payMethod:"", ticketSub:""};
-    const secTicket = document.getElementById("sec_ticketSub");
-    const rowCash = document.getElementById("row_cash");
-    const rowCredit = document.getElementById("row_credit");
-    const inCash = document.getElementById("in_cash");
-    const inCredit = document.getElementById("in_credit");
-    const inNote = document.getElementById("in_note");
-    let focused = inCash;
+  const defaults={taxRate:10,feeRate:4,goFeeYen:100,walkRate:50,closeStartDay:16,closeEndDay:15};
 
-    function clearSelected(group){
-      document.querySelectorAll(`button[data-group="${group}"]`).forEach(b=>b.classList.remove("is-selected"));
-    }
-    
-function selectBtn(group, btn){
-  const already = btn.classList.contains("is-selected");
-  clearSelected(group);
-  if(!already){
-    btn.classList.add("is-selected");
-    return true; // now selected
+  const monthSelect=document.getElementById('monthSelect');
+  const tbody=document.getElementById('tbody');
+
+  function loadJson(k,f){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?f:v;}catch(_){return f;}}
+  function saveJson(k,v){localStorage.setItem(k,JSON.stringify(v));}
+  function ymd(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  function parseYmd(s){const [y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d);}  
+  function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+  function addMonths(d,n){const x=new Date(d);x.setMonth(x.getMonth()+n);return x;}
+  function fmtNum(v){return Math.round(Number(v)||0).toLocaleString('ja-JP');}
+  function pad2(n){return String(n).padStart(2,'0');}
+  function hm(totalMin){const m=Math.max(0,Math.round(Number(totalMin)||0));return `${Math.floor(m/60)}:${pad2(m%60)}`;}
+  function dowJa(d){return ['日','月','火','水','木','金','土'][d.getDay()];}
+  function minDiff(a,b){const x=new Date(a).getTime(), y=new Date(b).getTime(); if(isNaN(x)||isNaN(y)) return 0; return Math.max(0,Math.round((y-x)/60000));}
+
+  function toDayId(r){
+    if(r&&r.dayId) return String(r.dayId);
+    const d=new Date(r?.createdAt||r?.at||Date.now());
+    return isNaN(d)?'':ymd(d);
   }
-  return false; // now unselected
-}
 
-    function applyPayRules(){
-      if(state.payMethod === "チケット他") secTicket.classList.remove("is-hidden");
-      else secTicket.classList.add("is-hidden");
+  function getSettings(){ return Object.assign({}, defaults, loadJson(SETTINGS_KEY, {})); }
 
-      if(state.payMethod === "現金"){
-        rowCash.classList.remove("is-hidden");
-        rowCredit.classList.add("is-hidden");
-        focused = inCash;
-      } else if(state.payMethod === "チケット他"){
-        rowCash.classList.remove("is-hidden");
-        rowCredit.classList.remove("is-hidden");
-        focused = inCredit;
-      } else {
-        rowCash.classList.add("is-hidden");
-        rowCredit.classList.remove("is-hidden");
-        focused = inCredit;
-      }
-
-    const secAmounts = document.getElementById("sec_amounts");
-
-    function scrollToAmountsIfReady(){
-      // 乗車種別＋支払方法が両方決まったら、金額入力へスクロール＆フォーカス
-      if(!state.rideType || !state.payMethod) return;
-      // DOMの表示切替が反映されてからスクロールしたいので少し待つ
-      setTimeout(()=>{
-        if(secAmounts) secAmounts.scrollIntoView({behavior:"smooth", block:"start"});
-        // 表示されている入力にフォーカス
-        if(state.payMethod === "現金") inCash.focus();
-        else inCredit.focus();
-      }, 50);
-    }
-
-    }
-
-    document.addEventListener("click", (e)=>{
-      const btn = e.target.closest("button[data-group]");
-      
-if(btn){
-  const g = btn.dataset.group;
-  const v = btn.dataset.value || btn.textContent.trim();
-
-  const selected = selectBtn(g, btn);
-
-  if(g === "rideType") state.rideType = selected ? v : "";
-  if(g === "payMethod"){
-    state.payMethod = selected ? v : "";
-    if(!selected){
-      state.ticketSub = "";
-      clearSelected("ticketSub");
-    }
-    applyPayRules();
+  function getPeriodForDate(date,startDay,endDay){
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    let start = new Date(d.getFullYear(), d.getMonth(), startDay);
+    if(d.getDate() < startDay) start = addMonths(start,-1);
+    let end = new Date(start.getFullYear(), start.getMonth(), endDay);
+    if(end < start) end = addMonths(end,1);
+    return {start,end};
   }
-  if(g === "ticketSub") state.ticketSub = selected ? v : "";
 
-  if((g === "rideType" || g === "payMethod") && selected){
-    scrollToAmountsIfReady();
+  function periodId(p){ return `${ymd(p.start)}_${ymd(p.end)}`; }
+  function periodLabel(p){ return `${ymd(p.start)} 〜 ${ymd(p.end)}`; }
+
+  function periodDays(p){
+    const out=[]; let d=new Date(p.start);
+    while(d<=p.end){ out.push(new Date(d)); d=addDays(d,1); }
+    return out;
   }
-  return;
-}
 
+  function calcDayNet(dayId, reports, settings){
+    const rows=reports.filter(r=>toDayId(r)===dayId);
+    if(!rows.length) return 0;
+    let gross=0, feeBase=0, goFeeCases=0;
+    rows.forEach(r=>{
+      const cash=Number(r.cash)||0, credit=Number(r.credit)||0;
+      gross += cash + credit;
+      const pay=String(r.payMethod||'');
+      if(['QR','クレカ','電子M','GO pay','GO Pay','乗込GO Pay'].includes(pay)) feeBase += cash + credit;
+      const ride=String(r.rideType||'');
+      if(ride==='GO' && !['GO pay','GO Pay','乗込GO Pay'].includes(pay)) goFeeCases += 1;
+    });
+    const tax = gross * (Number(settings.taxRate)||0) / 100;
+    const fee = feeBase * (Number(settings.feeRate)||0) / 100;
+    const goFee = goFeeCases * (Number(settings.goFeeYen)||0);
+    const base = gross - tax - fee - goFee;
+    return Math.round(base * (Number(settings.walkRate)||0) / 100);
+  }
 
-      const keyBtn = e.target.closest("button[data-key]");
-      if(keyBtn){
-        const k = keyBtn.dataset.key;
-        if(!focused) return;
-        const cur = String(focused.value||"");
-        if(k === "clear") focused.value = "";
-        else if(k === "back") focused.value = cur.slice(0,-1);
-        else if(/^[0-9]$/.test(k)) focused.value = cur + k;
-        focused.focus();
-        return;
+  function calcOpsDay(dayId){
+    const ops=loadJson(OPS_KEY,{});
+    if(!ops || ops.dayId!==dayId || !ops.returnAt) return null;
+    const depart=ops.departAt?new Date(ops.departAt):null;
+    const ret=ops.returnAt?new Date(ops.returnAt):null;
+    const breakMin=(ops.breakSessions||[]).reduce((s,x)=>s+(Number(x.minutes)||0),0);
+    const workMin=(depart&&ret)?Math.max(0,minDiff(depart,ret)-breakMin):0;
+    return {
+      depart: depart?`${pad2(depart.getHours())}:${pad2(depart.getMinutes())}`:'--',
+      breakMin,
+      workMin
+    };
+  }
+
+  function getPlan(){ return loadJson(PLAN_KEY, {}); }
+  function savePlan(p){ saveJson(PLAN_KEY, p); }
+
+  function buildPeriods(settings,reports){
+    const set = new Map();
+    const seed=[new Date()];
+    reports.forEach(r=>{ const d=parseYmd(toDayId(r)); if(!isNaN(d)) seed.push(d); });
+    const ops=loadJson(OPS_KEY,{});
+    if(ops && ops.dayId){ const d=parseYmd(ops.dayId); if(!isNaN(d)) seed.push(d); }
+    seed.forEach(d=>{ const p=getPeriodForDate(d, Number(settings.closeStartDay)||16, Number(settings.closeEndDay)||15); set.set(periodId(p), p); });
+    return Array.from(set.values()).sort((a,b)=>b.start-a.start);
+  }
+
+  function render(){
+    const settings=getSettings();
+    const reports=loadJson(REPORT_KEY,[]);
+    const plan=getPlan();
+    const periods=buildPeriods(settings,reports);
+
+    if(!monthSelect.options.length){
+      monthSelect.innerHTML=periods.map(p=>`<option value="${periodId(p)}">${periodLabel(p)}</option>`).join('');
+    }
+    if(!monthSelect.value && periods[0]) monthSelect.value=periodId(periods[0]);
+
+    const period = periods.find(p=>periodId(p)===monthSelect.value) || periods[0];
+    if(!period) return;
+    const days=periodDays(period);
+
+    tbody.innerHTML='';
+    let sumTarget=0,sumResult=0,sumDiff=0,sumWork=0,sumBreak=0;
+
+    days.forEach((d,idx)=>{
+      const dayId=ymd(d);
+      if(!plan[dayId]) plan[dayId]={ shift:'work', target:'' };
+
+      // 1行だけデモデータ
+      if(idx===0 && !plan[dayId]._demo){
+        plan[dayId]={ shift:'work', target:'20000', _demo:true };
       }
+
+      const row=plan[dayId];
+      const shift=row.shift;
+      const active=(shift==='work' || shift==='part');
+      const result=active?calcDayNet(dayId,reports,settings):0;
+      const target=active?(Number(row.target)||0):0;
+      const diff=result-target;
+      const opsData=active?calcOpsDay(dayId):null;
+      const workMin=opsData?opsData.workMin:0;
+      const breakMin=opsData?opsData.breakMin:0;
+      const hour=workMin>0?Math.round(result/(workMin/60)):0;
+
+      if(active){
+        sumTarget+=target; sumResult+=result; sumDiff+=diff; sumWork+=workMin; sumBreak+=breakMin;
+      }
+
+      const tr=document.createElement('tr');
+      const wk=d.getDay();
+      const wkCls=wk===6?'sat':(wk===0?'sun':'');
+      tr.innerHTML=`
+        <td>
+          <button type="button" class="shift-btn ${SHIFT_CLASS[shift]}" data-day="${dayId}">${SHIFT_LABEL[shift]}</button>
+        </td>
+        <td class="date ${wkCls}">${d.getMonth()+1}/${d.getDate()}(${dowJa(d)})</td>
+        <td class="${active?'':'muted'}"><input class="target-input" data-target="${dayId}" value="${active?(row.target||''):''}" ${active?'':'disabled'} inputmode="numeric"></td>
+        <td class="${active?'':'muted'}">${active?fmtNum(result):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(diff>=0?`+${fmtNum(diff)}`:`-${fmtNum(Math.abs(diff))}`):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?opsData.depart:'--'):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?hm(workMin):'--'):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?hm(breakMin):'--'):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?fmtNum(hour):'--'):'-'}</td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    [inCash, inCredit].forEach(inp=>{
-      inp.addEventListener("focus", ()=>focused = inp);
-      inp.addEventListener("click", ()=>focused = inp);
-    });
+    savePlan(plan);
 
-    document.getElementById("btn_clear").addEventListener("click", ()=>{
-      state.rideType=""; state.payMethod=""; state.ticketSub="";
-      document.querySelectorAll("button").forEach(b=>b.classList.remove("is-selected"));
-      inCash.value=""; inCredit.value=""; inNote.value="";
-      rowCash.classList.remove("is-hidden");
-      rowCredit.classList.remove("is-hidden");
-      secTicket.classList.add("is-hidden");
-      focused = inCash;
-    });
+    document.getElementById('sumTarget').textContent=fmtNum(sumTarget);
+    document.getElementById('sumResult').textContent=fmtNum(sumResult);
+    document.getElementById('sumDiff').textContent=(sumDiff>=0?`+${fmtNum(sumDiff)}`:`-${fmtNum(Math.abs(sumDiff))}`);
+    document.getElementById('sumWork').textContent=hm(sumWork);
+    document.getElementById('sumBreak').textContent=hm(sumBreak);
+    document.getElementById('sumHour').textContent=sumWork>0?fmtNum(Math.round(sumResult/(sumWork/60))):'0';
+  }
 
-    document.getElementById("btn_submit").addEventListener("click", ()=>{
-      // --- Save to localStorage (for GitHub Pages review) ---
-      if(!state.rideType || !state.payMethod){
-        alert("乗車種別と支払方法を選んでください");
-        return;
-      }
+  monthSelect.addEventListener('change', render);
 
-      const cash = (inCash.value||"").trim();
-      const credit = (inCredit.value||"").trim();
+  tbody.addEventListener('click',(e)=>{
+    const btn=e.target.closest('.shift-btn');
+    if(!btn) return;
+    const day=btn.dataset.day;
+    const plan=getPlan();
+    if(!plan[day]) plan[day]={shift:'work',target:''};
+    const i=SHIFT_ORDER.indexOf(plan[day].shift);
+    plan[day].shift = SHIFT_ORDER[(i+1)%SHIFT_ORDER.length];
+    savePlan(plan);
+    render();
+  });
 
-      if(!cash && !credit){
-        alert("現収か未収のどちらかに金額を入力してください");
-        return;
-      }
+  tbody.addEventListener('input',(e)=>{
+    const input=e.target.closest('input[data-target]');
+    if(!input) return;
+    const day=input.dataset.target;
+    const plan=getPlan();
+    if(!plan[day]) plan[day]={shift:'work',target:''};
+    plan[day].target = String(input.value||'').replace(/[^0-9]/g,'');
+    savePlan(plan);
+    render();
+  });
 
-      const now = new Date();
-      const hh = String(now.getHours()).padStart(2,"0");
-      const mm = String(now.getMinutes()).padStart(2,"0");
-
-      const entry = {
-        id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)),
-        time: `${hh}:${mm}`,
-        ts: now.toISOString(),
-        rideType: state.rideType,
-        payMethod: state.payMethod,
-        ticketSub: state.ticketSub || "",
-        cash: cash ? Number(cash.replace(/[^0-9]/g,"")) : 0,
-        credit: credit ? Number(credit.replace(/[^0-9]/g,"")) : 0,
-        note: (inNote.value||"").trim()
-      };
-
-      const params = new URLSearchParams(location.search);
-      const editId = params.get("edit");
-
-      let list = [];
-      try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch(e) { list = []; }
-
-      if(editId){
-        const idx = list.findIndex(x=>x.id===editId);
-        if(idx >= 0){
-          entry.id = editId;
-          list[idx] = entry;
-        } else {
-          list.unshift(entry);
-        }
-        localStorage.removeItem("tsms_edit_id");
-      } else {
-        list.unshift(entry);
-      }
-
-      localStorage.setItem("tsms_reports", JSON.stringify(list));
-
-      // clear form (keep UI rules)
-      document.getElementById("btn_clear").click();
-
-      // go confirm
-      location.href = "confirm.html";
-    });
-
-    
-    // --- Load for edit (from confirm page) ---
-    (function(){
-      const params = new URLSearchParams(location.search);
-      const editId = params.get("edit");
-      if(!editId) return;
-
-      let list = [];
-      try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch(e) { list = []; }
-      const e = list.find(x=>x.id===editId);
-      if(!e) return;
-
-      // restore selections
-      state.rideType = e.rideType || "";
-      state.payMethod = e.payMethod || "";
-      state.ticketSub = e.ticketSub || "";
-
-      // select buttons by matching dataset value/text
-      document.querySelectorAll('button[data-group="rideType"]').forEach(b=>{
-        const v = b.dataset.value || b.textContent.trim();
-        if(v === state.rideType) { b.classList.add("is-selected"); }
-      });
-      document.querySelectorAll('button[data-group="payMethod"]').forEach(b=>{
-        const v = b.dataset.value || b.textContent.trim();
-        if(v === state.payMethod) { b.classList.add("is-selected"); }
-      });
-
-      applyPayRules();
-      if(state.payMethod === "チケット"){
-        secTicket.classList.remove("is-hidden");
-        document.querySelectorAll('button[data-group="ticketSub"]').forEach(b=>{
-          const v = b.dataset.value || b.textContent.trim();
-          if(v === state.ticketSub) { b.classList.add("is-selected"); }
-        });
-      }
-
-      inCash.value = e.cash ? String(e.cash) : "";
-      inCredit.value = e.credit ? String(e.credit) : "";
-      inNote.value = e.note || "";
-      focused = inCash;
-
-      // scroll to amounts
-      setTimeout(scrollToAmountsIfReady, 50);
-    })();
-
-
-    // init
-    secTicket.classList.add("is-hidden");
-    applyPayRules();
-  </script>
+  render();
+})();
+</script>
 
 <script>
 (function(){
@@ -368,301 +322,14 @@ if(btn){
   const bg = document.getElementById("tsmsMenuBg");
   const burger = document.getElementById("tsmsHamburger");
   if(!menu || !bg || !burger) return;
-
   function openMenu(){ menu.classList.add("open"); bg.classList.add("show"); }
   function closeMenu(){ menu.classList.remove("open"); bg.classList.remove("show"); }
-
   burger.addEventListener("click", openMenu);
   burger.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" ") openMenu(); });
   bg.addEventListener("click", closeMenu);
-  menu.querySelectorAll("a").forEach(a=>a.addEventListener("click", closeMenu));
+  menu.querySelectorAll("a").forEach((a)=>a.addEventListener("click", closeMenu));
 })();
 </script>
-
-
-
-
-<script>
-/* --- Scroll fix (ONLY): rideType + payMethod + ticketSub -> scroll control --- */
-(function(){
-  const secAmounts = document.getElementById("sec_amounts");
-  const secTicketSub = document.getElementById("sec_ticketSub");
-  const rowCash = document.getElementById("row_cash");
-  const rowCredit = document.getElementById("row_credit");
-  const inCash = document.getElementById("in_cash");
-  const inCredit = document.getElementById("in_credit");
-
-  function isVisible(el){
-    return el && !el.classList.contains("is-hidden") && el.offsetParent !== null;
-  }
-
-  function getSelectedValue(group){
-    const b = document.querySelector(`button[data-group="${group}"].is-selected`);
-    return b ? (b.dataset.value || b.textContent.trim()) : "";
-  }
-
-  function scrollToAmounts(){
-    let target = null;
-    const pay = getSelectedValue("payMethod");
-    const cashVisible = isVisible(rowCash);
-    const creditVisible = isVisible(rowCredit);
-
-    if(cashVisible && pay === "現金") target = inCash;
-    else if(creditVisible) target = inCredit;
-    else if(cashVisible) target = inCash;
-    else target = inCredit || inCash;
-
-    if(secAmounts){
-      secAmounts.scrollIntoView({behavior:"smooth", block:"start"});
-    } else if(target){
-      target.scrollIntoView({behavior:"smooth", block:"center"});
-    }
-
-    setTimeout(()=>{
-      try{
-        if(target){
-          target.focus({preventScroll:true});
-          if(typeof target.select === "function") target.select();
-        }
-      }catch(e){}
-    }, 120);
-  }
-
-  function run(){
-    const ride = getSelectedValue("rideType");
-    const pay  = getSelectedValue("payMethod");
-    const ticketSub = getSelectedValue("ticketSub");
-
-    if(!ride || !pay) return;
-
-    // ① チケット他 → 追加選択へ
-    if(pay === "チケット他" && !ticketSub && isVisible(secTicketSub)){
-      secTicketSub.scrollIntoView({behavior:"smooth", block:"start"});
-      return;
-    }
-
-    // ② チケット他で追加選択完了 → 金額入力へ
-    if(pay === "チケット他" && ticketSub){
-      scrollToAmounts();
-      return;
-    }
-
-    // ③ 通常 → 金額入力へ
-    scrollToAmounts();
-  }
-
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest('button[data-group="rideType"],button[data-group="payMethod"],button[data-group="ticketSub"]');
-    if(!btn) return;
-    setTimeout(run, 0);
-  }, true);
-})();
-</script>
-
-
-
-
-<script>
-/* --- Clear confirm dialog ONLY --- */
-(function(){
-  const btn = document.getElementById("btn_clear");
-  if(!btn) return;
-
-  btn.addEventListener("click", function(e){
-    // stop original handler temporarily
-    e.stopImmediatePropagation();
-
-    const ok = true;
-    if(ok){
-      // trigger original click again without this interceptor
-      btn.removeEventListener("click", arguments.callee, true);
-      btn.click();
-    }
-    // if cancel: do nothing
-  }, true);
-})();
-</script>
-
-
-
-<script>
-/* --- Register confirm + save + success + delayed redirect ONLY --- */
-(function(){
-  const btn = document.getElementById("btn_submit");
-  if(!btn) return;
-
-  // avoid double-binding
-  if(btn.dataset.boundRegisterConfirm === "1") return;
-  btn.dataset.boundRegisterConfirm = "1";
-
-  btn.addEventListener("click", function(e){
-    // block other handlers so we control register flow
-    e.preventDefault();
-    e.stopImmediatePropagation();
-
-    const ok = confirm("登録しますか？\n\nはい = OK\nいいえ = キャンセル");
-    if(!ok) return;
-
-    try{
-      const ride = document.querySelector('button[data-group="rideType"].is-selected');
-      const pay  = document.querySelector('button[data-group="payMethod"].is-selected');
-      const ticket = document.querySelector('button[data-group="ticketSub"].is-selected');
-
-      const cash = document.getElementById("in_cash")?.value || "";
-      const credit = document.getElementById("in_credit")?.value || "";
-
-      const record = {
-        time: new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}),
-        rideType: ride ? (ride.dataset.value || ride.innerText.trim()) : "",
-        payMethod: pay ? (pay.dataset.value || pay.innerText.trim()) : "",
-        ticketSub: ticket ? (ticket.dataset.value || ticket.innerText.trim()) : "",
-        cash: cash,
-        credit: credit,
-        ts: new Date().toISOString()
-      };
-
-      const KEY = "tsms_reports";
-      const EDIT_INDEX_KEY = "tsms_edit_index";
-      const EDIT_RECORD_KEY = "tsms_edit_record";
-      const list = JSON.parse(localStorage.getItem(KEY) || "[]");
-      const editIdxRaw = localStorage.getItem(EDIT_INDEX_KEY);
-      const editIdx = (editIdxRaw !== null && editIdxRaw !== "") ? Number(editIdxRaw) : null;
-      if(editIdx !== null && !Number.isNaN(editIdx) && list[editIdx]){
-        list[editIdx] = record; // order unchanged
-        localStorage.removeItem(EDIT_INDEX_KEY);
-        localStorage.removeItem(EDIT_RECORD_KEY);
-      } else {
-        list.push(record);
-      }
-      localStorage.setItem(KEY, JSON.stringify(list));
-
-      alert("登録しました！");
-
-      setTimeout(()=>{
-        location.href = "confirm.html";
-      }, 3000);
-
-    }catch(err){
-      console.error("register confirm error", err);
-      alert("登録に失敗しました（エラー）");
-    }
-  }, true);
-})();
-</script>
-
-
-
-
-<script>
-/* --- Clear confirm dialog (FIX): actually clears all selected + amounts --- */
-(function(){
-  const btn = document.getElementById("btn_clear");
-  if(!btn) return;
-
-  // bind once
-  if(btn.dataset.boundClearConfirmFix === "1") return;
-  btn.dataset.boundClearConfirmFix = "1";
-
-  btn.addEventListener("click", function(e){
-    // take over clear flow, keep everything else unchanged
-    e.preventDefault();
-    e.stopImmediatePropagation();
-
-    const ok = confirm("削除してよろしいですか？\n\nいいえ = キャンセル\nはい = OK");
-    if(!ok) return;
-
-    try{
-      // Use existing globals/ids from the page (do not change any other behavior)
-      // state / rowCash / rowCredit / secTicket / inCash / inCredit / inNote / focused are defined in the main script scope.
-      if(typeof state === "object"){
-        state.rideType = "";
-        state.payMethod = "";
-        state.ticketSub = "";
-      }
-
-      document.querySelectorAll("button").forEach(b=>b.classList.remove("is-selected"));
-
-      const inCash = document.getElementById("in_cash");
-      const inCredit = document.getElementById("in_credit");
-      const inNote = document.getElementById("in_note");
-      if(inCash) inCash.value = "";
-      if(inCredit) inCredit.value = "";
-      if(inNote) inNote.value = "";
-
-      const rowCash = document.getElementById("row_cash");
-      const rowCredit = document.getElementById("row_credit");
-      const secTicket = document.getElementById("sec_ticketSub");
-
-      if(rowCash) rowCash.classList.remove("is-hidden");
-      if(rowCredit) rowCredit.classList.remove("is-hidden");
-      if(secTicket) secTicket.classList.add("is-hidden");
-
-      // reset focus to cash
-      try{
-        if(inCash){
-          inCash.focus({preventScroll:true});
-          if(typeof inCash.select === "function") inCash.select();
-        }
-      }catch(err){}
-    }catch(err){
-      console.error("clear fix error", err);
-    }
-  }, true);
-})();
-</script>
-
-
-<script>
-/* --- Prefill for edit (ONLY) --- */
-(function(){
-  const EDIT_RECORD_KEY = "tsms_edit_record";
-  const raw = localStorage.getItem(EDIT_RECORD_KEY);
-  if(!raw) return;
-
-  let rec = null;
-  try{ rec = JSON.parse(raw); }catch(e){ return; }
-  if(!rec) return;
-
-  // Helper: click button by group + label/value (uses existing logic)
-  function clickMatch(group, value){
-    const btns = Array.from(document.querySelectorAll(`button[data-group="${group}"]`));
-    const b = btns.find(x => (x.dataset.value||"").trim() === String(value).trim())
-          || btns.find(x => (x.textContent||"").trim() === String(value).trim());
-    if(b) b.click();
-  }
-
-  // Prefill selections
-  if(rec.rideType) clickMatch("rideType", rec.rideType);
-  if(rec.payMethod) clickMatch("payMethod", rec.payMethod);
-  if(rec.ticketSub) clickMatch("ticketSub", rec.ticketSub);
-
-  // Prefill amounts & note
-  const inCash = document.getElementById("in_cash");
-  const inCredit = document.getElementById("in_credit");
-  const inNote = document.getElementById("in_note");
-  if(inCash) inCash.value = rec.cash || "";
-  if(inCredit) inCredit.value = rec.credit || "";
-  if(inNote) inNote.value = rec.note || "";
-
-  // Focus appropriate input
-  setTimeout(()=>{
-    try{
-      if(inCredit && rec.credit){
-        inCredit.focus({preventScroll:true});
-        if(typeof inCredit.select === "function") inCredit.select();
-      } else if(inCash){
-        inCash.focus({preventScroll:true});
-        if(typeof inCash.select === "function") inCash.select();
-      }
-    }catch(e){}
-  }, 150);
-})();
-</script>
-
-
-  <script>
-    (function(){if('serviceWorker'in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();
-  </script>
-
+<script>(function(){if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){window.addEventListener('load', function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();</script>
 </body>
 </html>
