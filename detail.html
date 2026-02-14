@@ -17,8 +17,10 @@
     .box{border:1px solid var(--border);padding:0 10px;}
     .line{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed #ddd;align-items:flex-start;}
     .line:last-child{border-bottom:none;}
-    .k{width:160px;font-weight:800;}
-    .v{margin-left:auto;font-weight:900;text-align:right;white-space:nowrap;}
+    .k{width:160px;font-weight:500;}
+    .v{margin-left:auto;font-weight:500;text-align:right;white-space:nowrap;}
+    .line.strong .k,
+    .line.strong .v{font-weight:900;}
 
 /* ---- TSMS Hamburger Menu (overlay) ---- */
 .tsms-header{
@@ -148,8 +150,8 @@
     const mm = m%60;
     return `${h}時間${String(mm).padStart(2,"0")}分`;
   }
-  function line(label, value){
-    return `<div class="line"><div class="k">${label}</div><div class="v">${value}</div></div>`;
+  function line(label, value, strong=false){
+    return `<div class="line${strong ? " strong" : ""}"><div class="k">${label}</div><div class="v">${value}</div></div>`;
   }
 
   function render(){
@@ -183,7 +185,7 @@
     const fee = feeBase * (num(settings.feeRate)/100);
 
     const goCases = rows.filter(r => String(r.rideType||"") === "GO").length;
-    const goPayCount = rows.filter(r => ["GO pay","GO Pay"].includes(String(r.payMethod||""))).length;
+    const goPayCount = rows.filter(r => ["GO pay","GO Pay","乗込GO Pay"].includes(String(r.payMethod||""))).length;
     const norikomiGoPayCount = rows.filter(r => String(r.payMethod||"") === "乗込GO Pay").length;
     const goAmount = rows.filter(r => ["GO pay","GO Pay","乗込GO Pay"].includes(String(r.payMethod||""))).reduce((s,r)=> s + num(r.cash) + num(r.credit), 0);
     const goFeeCases = rows.filter(r => String(r.rideType||"")==="GO" && !["GO pay","GO Pay","乗込GO Pay"].includes(String(r.payMethod||""))).length;
@@ -199,17 +201,17 @@
       line("出庫時間", fmtIso(departAt)),
       line("経過時間", fmtMinutes(elapsedMin)),
       line("休憩時間", fmtMinutes(breakMin)),
-      line("実働時間", fmtMinutes(workMin))
+      line("実働時間", fmtMinutes(workMin), true)
     ].join("");
 
     document.getElementById("salesBox").innerHTML = [
       line("実車回数", `${tripCount}回`),
       line("現収合計", yen(cashSum)),
       line("未収合計", yen(creditSum)),
-      line("売上合計（税込）", yen(salesInTax)),
+      line("売上合計（税込）", yen(salesInTax), true),
       line("売上合計（税抜）", yen(salesExTax)),
       line("決済手数料", yen(fee)),
-      line("概算手取", yen(takeHome)),
+      line("概算手取", yen(takeHome), true),
       line("時給換算", yen(hourly))
     ].join("");
 
@@ -217,7 +219,7 @@
       line("GO予約数", `${goCases}回`),
       line("GO手配料", yen(goFeeTotal)),
       line("GO Pay件数", `${goPayCount}件`),
-      line("乗込GO Pay件数", `${norikomiGoPayCount}件`),
+      line("（内、乗込GO Pay）", `${norikomiGoPayCount}件`),
       line("GO計金額", yen(goAmount))
     ].join("");
   }
