@@ -61,36 +61,33 @@ html,body{
 .menu-bg.show{ opacity:1; pointer-events:auto; }
 
 /* Content */
-.container{ padding:14px; }
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2, 1fr);
-  gap:12px;
-}
-a.tile{
+.container{padding:14px;}
+.doc{
   border:2px solid var(--border);
-  aspect-ratio:1/1;
-  display:flex; align-items:center; justify-content:center;
-  font-weight:900; font-size:22px;
-  background:var(--bg);
-  text-decoration:none; color:var(--text-primary);
-  border-radius:0;
+  background:var(--surface-1);
 }
-a.tile:active{ transform:translateY(1px); }
-
-.footer{
-  padding:10px 14px 18px;
-  font-size:12px; color:#666;
+.doc-head{
+  border-bottom:2px solid var(--border);
+  padding:14px;
+  font-size:22px;
+  font-weight:800;
+  line-height:1.3;
 }
-
-@media (min-width:520px){
-  .grid{ grid-template-columns:repeat(3, 1fr); }
-}
+.doc-head .mark{display:inline-block;width:34px;height:34px;vertical-align:middle;margin-right:10px;background:url('icon.png') center/contain no-repeat;}
+.doc-body{padding:16px;line-height:1.7;font-size:16px;}
+.doc-title-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.doc-title{font-size:44px;font-weight:400;line-height:1;}
+.doc-updated{font-size:16px;color:var(--text-secondary);font-weight:700;}
+.doc p{margin:0 0 10px;}
+.guide-list{margin:8px 0 0 0;padding-left:1.2em;}
+.guide-list>li{margin-bottom:14px;}
+.subline{display:block;margin-left:1.2em;}
+.contact{margin-top:18px;}
+.sign{margin-top:6px;text-align:right;font-weight:700;}
 
 @media (min-width:768px){
-  .container{ max-width:560px; margin:0 auto; }
-  .header{font-size:24px;}
-  a.tile{font-size:24px;}
+  .container{max-width:760px;margin:0 auto;}
+  .doc-head{font-size:28px;}
 }
 /* ---- Theme tokens ---- */
 :root{
@@ -179,15 +176,44 @@ a{ color:var(--link); }
 </header>
 
 <main class="container" role="main">
-  <section class="grid" aria-label="メニュー">
-    <a class="tile" href="report.html">日報入力</a>
-    <a class="tile" href="confirm.html">入力確認</a>
-    <a class="tile" href="detail.html">詳細確認</a>
+  <section class="doc" aria-label="アプリ説明">
+    <div class="doc-head"><span class="mark" aria-hidden="true"></span>Taxi Sales Management system</div>
+    <div class="doc-body">
+      <div class="doc-title-row">
+        <div class="doc-title">アプリの説明書</div>
+        <div class="doc-updated">2026/02/15 更新</div>
+      </div>
 
-    <a class="tile" href="ops.html">出庫/帰庫/休憩</a>
-    <a class="tile" href="sales.html">月間管理</a>
-    <a class="tile" href="settings.html">設定</a>
+      <p>Taxi Sales Management systemをご利用いただきありがとうございます！</p>
+      <p>先ずは各ページの説明の前に、出庫前に 出庫/帰庫 ページを開いてください！</p>
+      <p>次に出庫準備を進め、SDカードを入れるタイミングになりましたら、アプリの"出庫"ボタンを押して、車両にSDカードを挿入してください。</p>
+      <p>出庫後は、乗車の度に紙に書いていた情報を今後はアプリに入力していきます。</p>
 
+      <p style="margin-top:20px;">各ページの説明です。</p>
+      <ul class="guide-list">
+        <li>日報入力ページ
+          <span class="subline">└ 乗車毎に乗車種別、支払い方法、現収、未収、必要であれば備考欄へ情報を入力していきます。ここで入力した乗車データは入力確認ページで確認出来ます。</span>
+        </li>
+        <li>入力確認ページ
+          <span class="subline">└ 乗車毎に入力したデータを一覧でご覧になれます。事務所へ帰った後、日報と照らし合わせながら支払い方法などを記入していくととても楽です。</span>
+        </li>
+        <li>詳細確認ページ
+          <span class="subline">└ 入力した各データを集計し、合計金額の確認や時給換算などが出来、営業の参考にすることが出来ます。GO Payの件数や値段も表示されるので、日報へそのまま記入が出来ます。</span>
+        </li>
+        <li>出庫 / 帰庫 / 休憩ページ
+          <span class="subline">└ 出庫時間、帰庫時間を管理でき、休憩時間もリアルタイムで表示、集計します。この日の記録をクリアボタンは紙日報を提出した後押し、アプリを終了させます。</span>
+        </li>
+        <li>月間管理ページ
+          <span class="subline">└ シフトの管理、売上目標の設定、月間で売上の管理を行えます。営業後、帰庫ボタンを押すとその日の営業成果が表示されます。予実管理を行うことで効率的な営業を行うことが出来ます。</span>
+        </li>
+        <li>設定ページ
+          <span class="subline">└ アプリの表示をライトモード、ダークモードで切り替えたり、給料の締日を決めることが出来ます。将来的に消費税や歩合のパーセンテージも変更出来ます。</span>
+        </li>
+      </ul>
+
+      <p class="contact">アプリについての要望や質問があれば、<strong>taxi-sms.@sm-s.com</strong>にご連絡下さい。</p>
+      <div class="sign">2026/2/15　B.O.A.T. Tsubakihara</div>
+    </div>
   </section>
 </main>
 
