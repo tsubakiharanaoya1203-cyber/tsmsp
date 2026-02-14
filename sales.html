@@ -27,9 +27,9 @@
     table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px;}
     th,td{border:1px dashed var(--border);padding:4px 2px;text-align:center;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     th{background:var(--surface-2);font-weight:900;}
-    td.date.sat{background:#e8f6ff;}
-    td.date.sun{background:#ffecec;}
-    td.date.holiday{background:#ffecec;}
+    td.date.sat{background:var(--week-sat-bg);color:var(--weekend-text);font-weight:800;}
+    td.date.sun{background:var(--week-sun-bg);color:var(--weekend-text);font-weight:800;}
+    td.date.holiday{background:var(--week-sun-bg);color:var(--weekend-text);font-weight:800;}
     .sum-row td{background:#55cad8;font-weight:900;border:2px solid var(--border);}
 
     .shift-btn{appearance:none;border:none;color:#fff;font-weight:900;border-radius:6px;padding:4px 2px;min-height:28px;width:100%;font-size:11px;}
@@ -43,8 +43,8 @@
     td.muted, .muted .target-input{background:#e2e8ee !important;color:#6a7582 !important;}
 
     /* ---- Theme tokens ---- */
-    :root{--bg:#F3F6F8;--surface-1:#FFFFFF;--surface-2:#EEF3F6;--border:#D5DEE6;--text-primary:#0F1720;--text-secondary:#344554;--text-muted:#5B6D7C;--accent:#2580ED;--accent-hover:#4DA3FF;--link:#187FBF;}
-    :root[data-theme="dark"]{--bg:#0F1417;--surface-1:#151C20;--surface-2:#1B242A;--border:#2A353D;--text-primary:#E6EEF3;--text-secondary:#B7C4CC;--text-muted:#8A949A;--accent:#3B95F0;--accent-hover:#4DA3FF;--link:#58C2FF;}
+    :root{--bg:#F3F6F8;--surface-1:#FFFFFF;--surface-2:#EEF3F6;--border:#D5DEE6;--text-primary:#0F1720;--text-secondary:#344554;--text-muted:#5B6D7C;--accent:#2580ED;--accent-hover:#4DA3FF;--link:#187FBF;--week-sat-bg:#dff2ff;--week-sun-bg:#ffe2e2;--weekend-text:#1d2a35;}
+    :root[data-theme="dark"]{--bg:#0F1417;--surface-1:#151C20;--surface-2:#1B242A;--border:#2A353D;--text-primary:#E6EEF3;--text-secondary:#B7C4CC;--text-muted:#8A949A;--accent:#3B95F0;--accent-hover:#4DA3FF;--link:#58C2FF;--week-sat-bg:#25485e;--week-sun-bg:#5a2f37;--weekend-text:#f6fbff;}
     html,body{ background:var(--bg)!important; color:var(--text-primary)!important; }
     a{ color:var(--link); }
     .tsms-header,.header,.app-header,.card,.wf-panel,.section,.date-switcher,.menu,.tsms-menu,.box,.panel{background:var(--surface-1)!important;border-color:var(--border)!important;color:var(--text-primary)!important;}
@@ -218,7 +218,8 @@
 
   function calcOpsDay(dayId){
     const ops=loadJson(OPS_KEY,{});
-    if(!ops || ops.dayId!==dayId || !ops.returnAt) return null;
+    const opsDay = (ops && ops.dayId) ? String(ops.dayId) : String(localStorage.getItem('tsms_report_current_day')||'');
+    if(!ops || opsDay!==dayId || !ops.returnAt) return null;
     const depart=ops.departAt?new Date(ops.departAt):null;
     const ret=ops.returnAt?new Date(ops.returnAt):null;
     const breakMin=(ops.breakSessions||[]).reduce((s,x)=>s+(Number(x.minutes)||0),0);
@@ -283,7 +284,7 @@
       const breakMin=opsData?opsData.breakMin:0;
       const hour=workMin>0?Math.round(result/(workMin/60)):0;
 
-      if(active && !pastLocked){
+      if(active){
         sumTarget+=target; sumResult+=result; sumDiff+=diff; sumWork+=workMin; sumBreak+=breakMin;
       }
 
@@ -297,12 +298,12 @@
         </td>
         <td class="date ${wkCls}">${d.getMonth()+1}/${d.getDate()}(${dowJa(d)})</td>
         <td class="${(active && !pastLocked)?'':'muted'}"><input class="target-input" data-target="${dayId}" value="${(active && !pastLocked)?(row.target||''):''}" ${(active && !pastLocked)?'':'disabled'} inputmode="numeric"></td>
-        <td class="${(active && !pastLocked)?'':'muted'}">${active?fmtNum(result):'-'}</td>
-        <td class="${(active && !pastLocked)?'':'muted'}">${active?(diff>=0?`+${fmtNum(diff)}`:`-${fmtNum(Math.abs(diff))}`):'-'}</td>
-        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?opsData.depart:'--'):'-'}</td>
-        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?hm(workMin):'--'):'-'}</td>
-        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?hm(breakMin):'--'):'-'}</td>
-        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?fmtNum(hour):'--'):'-'}</td>
+        <td class="${active?'':'muted'}">${active?fmtNum(result):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(diff>=0?`+${fmtNum(diff)}`:`-${fmtNum(Math.abs(diff))}`):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?opsData.depart:'--'):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?hm(workMin):'--'):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?hm(breakMin):'--'):'-'}</td>
+        <td class="${active?'':'muted'}">${active?(opsData?fmtNum(hour):'--'):'-'}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -340,6 +341,11 @@
     if(!plan[day]) plan[day]={shift:'work',target:''};
     plan[day].target = String(input.value||'').replace(/[^0-9]/g,'');
     savePlan(plan);
+  });
+
+  tbody.addEventListener('change',(e)=>{
+    const input=e.target.closest('input[data-target]');
+    if(!input) return;
     render(holidaySet);
   });
 

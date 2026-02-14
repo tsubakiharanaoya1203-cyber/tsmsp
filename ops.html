@@ -261,7 +261,11 @@ function safeParse(){
   }catch(e){ return null; }
 }
 function save(data){
-  try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){}
+  try{
+    const dayId = localStorage.getItem(CURRENT_DAY_KEY) || localYmd();
+    data.dayId = dayId;
+    localStorage.setItem(KEY, JSON.stringify(data));
+  }catch(e){}
 }
 function defaultData(){
   return {
@@ -377,6 +381,7 @@ btnDepart.onclick = ()=>{
   if(!localStorage.getItem(CURRENT_DAY_KEY)){
     localStorage.setItem(CURRENT_DAY_KEY, localYmd());
   }
+  d.dayId = localStorage.getItem(CURRENT_DAY_KEY) || localYmd();
   save(d);
   render();
 };
@@ -384,6 +389,7 @@ btnDepart.onclick = ()=>{
 btnReturn.onclick = ()=>{
   const d = load();
   d.returnAt = nowISO();
+  d.dayId = localStorage.getItem(CURRENT_DAY_KEY) || localYmd();
   save(d);
   render();
 };
