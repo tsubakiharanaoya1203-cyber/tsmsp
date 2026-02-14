@@ -19,7 +19,6 @@
     .line:last-child{border-bottom:none;}
     .k{width:160px;font-weight:800;}
     .v{margin-left:auto;font-weight:900;text-align:right;white-space:nowrap;}
-    .desc{color:var(--muted);font-size:12px;line-height:1.35;flex:1;}
 
 /* ---- TSMS Hamburger Menu (overlay) ---- */
 .tsms-header{
@@ -149,8 +148,8 @@
     const mm = m%60;
     return `${h}時間${String(mm).padStart(2,"0")}分`;
   }
-  function line(label, value, desc){
-    return `<div class="line"><div class="k">${label}</div><div class="desc">${desc||""}</div><div class="v">${value}</div></div>`;
+  function line(label, value){
+    return `<div class="line"><div class="k">${label}</div><div class="v">${value}</div></div>`;
   }
 
   function render(){
@@ -196,30 +195,30 @@
     const hourly = workMin > 0 ? (takeHome / (workMin/60)) : 0;
 
     document.getElementById("timeBox").innerHTML = [
-      line("現在時刻", fmtDateTime(now), "(現在時刻をyyyy/mm/dd hh:mm:ssで表示)"),
-      line("出庫時間", fmtIso(departAt), "(出庫ボタン押した時間)"),
-      line("経過時間", fmtMinutes(elapsedMin), "(出庫してからの経過時間)"),
-      line("休憩時間", fmtMinutes(breakMin), "(休憩時間の合計)"),
-      line("実働時間", fmtMinutes(workMin), "(経過時間から休憩合計時間を引いた時間数)")
+      line("現在時刻", fmtDateTime(now)),
+      line("出庫時間", fmtIso(departAt)),
+      line("経過時間", fmtMinutes(elapsedMin)),
+      line("休憩時間", fmtMinutes(breakMin)),
+      line("実働時間", fmtMinutes(workMin))
     ].join("");
 
     document.getElementById("salesBox").innerHTML = [
-      line("実車回数", `${tripCount}回`, "(入力確認ページのカードの数を回で表示)"),
-      line("現収合計", yen(cashSum), "(入力確認ページで現収だったものの合計金額を円で表示)"),
-      line("未収合計", yen(creditSum), "(入力確認ページで未収だったものの合計金額を円で表示)"),
-      line("売上合計（税込）", yen(salesInTax), "(現収と未収の合計から決済手数料とGO手配料を引いて円で表示)"),
-      line("売上合計（税抜）", yen(salesExTax), `((税込売上)の消費税${num(settings.taxRate).toFixed(2)}%抜き分を円で表示)`),
-      line("決済手数料", yen(fee), `((クレカ/QR/電子M対象)×${num(settings.feeRate).toFixed(2)}%を円で表示)`),
-      line("概算手取", yen(takeHome), `((売上合計 税抜)の${num(settings.walkRate).toFixed(2)}%を円で表示)`),
-      line("時給換算", yen(hourly), "(概算手取を実働時間で割った数値を円/hで表示)")
+      line("実車回数", `${tripCount}回`),
+      line("現収合計", yen(cashSum)),
+      line("未収合計", yen(creditSum)),
+      line("売上合計（税込）", yen(salesInTax)),
+      line("売上合計（税抜）", yen(salesExTax)),
+      line("決済手数料", yen(fee)),
+      line("概算手取", yen(takeHome)),
+      line("時給換算", yen(hourly))
     ].join("");
 
     document.getElementById("goBox").innerHTML = [
-      line("GO予約数", `${goCases}回`, "(乗車種別がGOの回数を回で表示)"),
-      line("GO手配料", yen(goFeeTotal), `((GOかつ非GO Pay件数)×${num(settings.goFeeYen).toLocaleString("ja-JP")}円を表示)`),
-      line("GO Pay件数", `${goPayCount}件`, "(支払方法がGO payだった件数を件で表示)"),
-      line("乗込GO Pay件数", `${norikomiGoPayCount}件`, "(支払方法が乗込GO Payだった件数を件で表示)"),
-      line("GO計金額", yen(goAmount), "(支払方法がGO pay、乗込GO Payだった分の合計金額を円で表示)")
+      line("GO予約数", `${goCases}回`),
+      line("GO手配料", yen(goFeeTotal)),
+      line("GO Pay件数", `${goPayCount}件`),
+      line("乗込GO Pay件数", `${norikomiGoPayCount}件`),
+      line("GO計金額", yen(goAmount))
     ].join("");
   }
 
