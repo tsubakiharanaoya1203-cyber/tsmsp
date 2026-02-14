@@ -9,7 +9,7 @@
 html,body{
   margin:0; padding:0;
   background:var(--bg); color:var(--fg);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP","Yu Gothic",sans-serif;
+  font-family:"Noto Sans JP", sans-serif;
 }
 
 /* Header */
@@ -29,7 +29,7 @@ html,body{
   display:flex; flex-direction:column; justify-content:space-between;
   cursor:pointer; user-select:none;
 }
-.hamburger span{ height:3px; background:var(--fg); display:block; }
+.hamburger span{ height:3px; background:#58C2FF; display:block; }
 
 /* Side menu */
 .menu{
@@ -46,7 +46,7 @@ html,body{
   display:block;
   padding:16px;
   border-bottom:1px solid #ddd;
-  text-decoration:none; color:var(--fg);
+  text-decoration:none; color:var(--text-primary);
   font-size:18px; font-weight:900;
 }
 .menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
@@ -73,7 +73,7 @@ a.tile{
   display:flex; align-items:center; justify-content:center;
   font-weight:900; font-size:18px;
   background:var(--bg);
-  text-decoration:none; color:var(--fg);
+  text-decoration:none; color:var(--text-primary);
   border-radius:0;
 }
 a.tile:active{ transform:translateY(1px); }
@@ -90,6 +90,43 @@ a.tile:active{ transform:translateY(1px); }
 @media (min-width:768px){
   .container{ max-width:560px; margin:0 auto; }
 }
+/* ---- Theme tokens ---- */
+:root{
+  --bg:#F3F6F8;
+  --surface-1:#FFFFFF;
+  --surface-2:#EEF3F6;
+  --border:#D5DEE6;
+  --text-primary:#0F1720;
+  --text-secondary:#344554;
+  --text-muted:#5B6D7C;
+  --accent:#2580ED;
+  --accent-hover:#4DA3FF;
+  --link:#187FBF;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1417;
+  --surface-1:#151C20;
+  --surface-2:#1B242A;
+  --border:#2A353D;
+  --text-primary:#E6EEF3;
+  --text-secondary:#B7C4CC;
+  --text-muted:#8A949A;
+  --accent:#3B95F0;
+  --accent-hover:#4DA3FF;
+  --link:#58C2FF;
+}
+html,body{ background:var(--bg)!important; color:var(--text-primary)!important; }
+a{ color:var(--link); }
+.tsms-header,.header,.app-header,.card,.wf-panel,.section,.date-switcher,.menu,.tsms-menu,.box{background:var(--surface-1)!important;border-color:var(--border)!important;color:var(--text-primary)!important;}
+.note,.wf-field-label,.label,.k,.idx,.desc,.wf-subnote,.wf-field-label{color:var(--text-muted)!important;}
+.tsms-menu a,.menu a,.header-to-report,.btn,.actionBtn,.key,.input,select,.key.small{background:var(--surface-2)!important;color:var(--text-primary)!important;border-color:var(--border)!important;}
+.menu small,.tsms-menu small{color:var(--text-muted)!important;}
+.btn.next{background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important;}
+.menu-bg,.tsms-menu-bg{background:rgba(15,23,32,.35)!important;}
+
+.hamburger span,.tsms-hamburger span{background:#58C2FF!important;}
+/* ---- Theme tokens end ---- */
+
 </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
@@ -98,17 +135,18 @@ a.tile:active{ transform:translateY(1px); }
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="TSMS">
 
+  <script>(function(){try{var t=localStorage.getItem("tsms_theme")==="dark"?"dark":"light";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#0F1417":"#F3F6F8");}catch(e){}})();</script>
 </head>
 <body>
 
 <nav class="menu" id="menu" aria-label="サイドメニュー">
   <a href="index.html">TOP<small>メニュー一覧</small></a>
-  <a href="report.html">日報入力<small>入力（Excel四角UI）</small></a>
-  <a href="confirm.html">入力確認<small>入力内容の確認・修正・削除</small></a>
-  <a href="detail.html">詳細確認<small>概算・集計の確認</small></a>
-  <a href="ops.html">出庫/帰庫/休憩<small>休憩タイマーなど</small></a>
-  <a href="sales.html">売上<small>月次の表（曜日/祝日色）</small></a>
-  <a href="settings.html">設定<small>締め期間 / 会社休み</small></a>
+  <a href="report.html">日報入力<small>乗車データを入力</small></a>
+  <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
+  <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
+  <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="menu-bg" id="menuBg" aria-hidden="true"></div>
 
@@ -132,7 +170,7 @@ a.tile:active{ transform:translateY(1px); }
   </section>
 </main>
 
-<div class="footer">build 2026-02-13 16:20:00</div>
+
 
 <script>
 const menu = document.getElementById("menu");
