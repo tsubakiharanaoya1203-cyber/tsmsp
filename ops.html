@@ -20,6 +20,17 @@ html,body{
   font-size:20px;
   font-weight:900;
 }
+.header-to-report{
+  margin-left:auto;
+  border:2px solid #000;
+  padding:6px 10px;
+  font-size:14px;
+  font-weight:900;
+  color:#000;
+  text-decoration:none;
+  line-height:1.2;
+  background:#fff;
+}
 /* Hamburger */
 .hamburger{
   position:absolute; left:14px; top:50%;
@@ -48,6 +59,7 @@ html,body{
   text-decoration:none; color:#111;
   font-size:18px; font-weight:700;
 }
+.menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
 .menu-bg{
   position:fixed; inset:0;
   background:rgba(0,0,0,0.25);
@@ -80,9 +92,16 @@ html,body{
   min-height:64px;
 }
 .btn.small{ font-size:14px; min-height:52px; padding:12px 10px; font-weight:800; }
+.btn.reset-final{ min-height:124px; line-height:1.3; }
+.btn.reset-final .warn{ display:block; color:#c00; font-size:13px; font-weight:900; margin-top:6px; }
 .btn.wide{ grid-column:1 / -1; }
 .btn.danger{ border-color:#333; }
 .btn:disabled{ opacity:.45; }
+.btn.next{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
 
 .pill{ border:2px solid var(--border); padding:4px 8px; font-size:12px; font-weight:800; display:inline-block; }
 
@@ -117,13 +136,13 @@ html,body{
 <body>
 
 <nav class="menu" id="menu">
-  <a href="index.html">TOP</a>
-  <a href="report.html">日報入力</a>
-  <a href="confirm.html">入力確認</a>
-  <a href="detail.html">詳細確認</a>
-  <a href="ops.html">出庫/帰庫/休憩</a>
-  <a href="sales.html">売上</a>
-  <a href="settings.html">設定</a>
+  <a href="index.html">TOP<small>メニュー一覧</small></a>
+  <a href="report.html">日報入力<small>乗車データを入力</small></a>
+  <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
+  <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
+  <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="menu-bg" id="menuBg"></div>
 
@@ -131,6 +150,7 @@ html,body{
   <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
   出庫 / 帰庫 / 休憩
   <span style="font-size:12px;font-weight:400;margin-left:10px;color:var(--muted);">build 2026-02-10 15:44:23</span>
+  <a class="header-to-report" href="report.html">入力画面へ</a>
 </header>
 
 <main class="main">
@@ -155,24 +175,12 @@ html,body{
       <button class="btn" type="button" id="btn_breakStart">休憩開始</button>
       <button class="btn" type="button" id="btn_breakEnd">休憩解除</button>
 
-      <button class="btn small danger wide" type="button" id="btn_reset">この日の記録をクリア</button>
+      <button class="btn danger wide reset-final" type="button" id="btn_reset">この日の記録をクリア<br><span class="warn">（〆作業として一番最後に実行）</span></button>
     </div>
 
     <div class="list" id="breakList"></div>
   </section>
 
-<!-- ===== 保存プレビュー（デザインは既存に合わせて四角・白黒） ===== -->
-<section class="card" id="savePreviewCard" style="margin-top:12px;">
-  <div class="card-title" style="font-weight:900;">保存プレビュー（ops）</div>
-  <p class="note" style="margin:6px 0 10px 0; font-size:12px; color:#666; line-height:1.35;">
-    このページで押した「出庫/帰庫/休憩」の記録は、端末内（localStorage）に保存されます。<br>
-    GitHubで動作確認するために、今保存される形をここに表示しています。
-  </p>
-  <div style="border:2px solid #000; padding:10px; font-size:12px; white-space:pre-wrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">
-    <div id="opsPreviewJson">（まだデータがありません）</div>
-  </div>
-</section>
-<!-- ============================================================ -->
 <div style="padding:8px 0; font-size:12px; color:#666;">build 2026-02-11 15:06:08</div>
 
 </main>
@@ -187,8 +195,13 @@ bg.onclick = () => { menu.classList.remove("open"); bg.classList.remove("show");
 
 /* ===== Ops Logic ===== */
 const KEY = "ops";
+const CURRENT_DAY_KEY = "tsms_report_current_day";
 
 function nowISO(){ return new Date().toISOString(); }
+function localYmd(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
 function pad(n){ return String(n).padStart(2,"0"); }
 function fmt(iso){
   if(!iso) return "--";
@@ -296,8 +309,20 @@ function render(){
   }
 
   // buttons state
+  const departMs = d.departAt ? new Date(d.departAt).getTime() : NaN;
+  const returnMs = d.returnAt ? new Date(d.returnAt).getTime() : NaN;
+  const running = !isNaN(departMs) && (isNaN(returnMs) || departMs >= returnMs);
+
+  btnDepart.disabled = running;
+  btnReturn.disabled = !running;
+
   btnBreakStart.disabled = d.breakActive;
   btnBreakEnd.disabled = !d.breakActive;
+
+  btnDepart.classList.toggle("next", !running);
+  btnReturn.classList.toggle("next", running);
+  btnBreakStart.classList.toggle("next", !d.breakActive);
+  btnBreakEnd.classList.toggle("next", d.breakActive);
 
   // list
   const sessions = d.breakSessions || [];
@@ -318,6 +343,9 @@ function render(){
 btnDepart.onclick = ()=>{
   const d = load();
   d.departAt = nowISO();
+  if(!localStorage.getItem(CURRENT_DAY_KEY)){
+    localStorage.setItem(CURRENT_DAY_KEY, localYmd());
+  }
   save(d);
   render();
 };
@@ -358,6 +386,7 @@ btnBreakEnd.onclick = ()=>{
 btnReset.onclick = ()=>{
   if(!confirm("この日の出庫/帰庫/休憩を全てクリアしますか？")) return;
   localStorage.removeItem(KEY);
+  localStorage.removeItem(CURRENT_DAY_KEY);
   render();
 };
 
@@ -365,119 +394,7 @@ render();
 setInterval(()=>{ try{ updateBreakTimer(load()); }catch(e){} }, 1000);
 </script>
 
-<script>
-(function(){
-  const KEY = "tsms_ops_logs";
 
-  function jstYmd(d){
-    return new Intl.DateTimeFormat("sv-SE", { timeZone:"Asia/Tokyo", year:"numeric", month:"2-digit", day:"2-digit" }).format(d);
-  }
-  function hhmm(d){
-    return new Intl.DateTimeFormat("ja-JP", { timeZone:"Asia/Tokyo", hour:"2-digit", minute:"2-digit", hour12:false }).format(d);
-  }
-  function now(){ return new Date(); }
-
-  function loadAll(){
-    try{
-      const raw = localStorage.getItem(KEY);
-      if(!raw) return {};
-      const obj = JSON.parse(raw);
-      return (obj && typeof obj === "object") ? obj : {};
-    }catch(e){ return {}; }
-  }
-  function saveAll(obj){
-    localStorage.setItem(KEY, JSON.stringify(obj));
-  }
-
-  function ensureDay(all, ymd){
-    if(!all[ymd]){
-      all[ymd] = {
-        outTime: "",
-        backTime: "",
-        breaks: [],
-        breakOpen: null,
-        totalBreakMinutes: 0
-      };
-    }
-    return all[ymd];
-  }
-
-  function recalcTotal(day){
-    const total = (day.breaks || []).reduce((a,b)=>a + (Number(b.minutes)||0), 0);
-    day.totalBreakMinutes = total;
-  }
-
-  function updatePreview(){
-    const preview = document.getElementById("opsPreviewJson");
-    if(!preview) return;
-    const all = loadAll();
-    const ymd = jstYmd(now());
-    const day = all[ymd] || null;
-    const view = { storageKey: KEY, todayKey: ymd, today: day };
-    preview.textContent = JSON.stringify(view, null, 2);
-  }
-
-  const btnOut = document.getElementById("btnOut") || document.getElementById("outBtn") || document.querySelector("[data-action='out']");
-  const btnBack = document.getElementById("btnBack") || document.getElementById("backBtn") || document.querySelector("[data-action='back']");
-  const btnBreakStart = document.getElementById("btnBreakStart") || document.getElementById("breakStartBtn") || document.querySelector("[data-action='breakStart']");
-  const btnBreakEnd = document.getElementById("btnBreakEnd") || document.getElementById("breakEndBtn") || document.querySelector("[data-action='breakEnd']");
-
-  function setOut(){
-    const all = loadAll();
-    const ymd = jstYmd(now());
-    const day = ensureDay(all, ymd);
-    day.outTime = hhmm(now());
-    saveAll(all);
-    updatePreview();
-  }
-  function setBack(){
-    const all = loadAll();
-    const ymd = jstYmd(now());
-    const day = ensureDay(all, ymd);
-    day.backTime = hhmm(now());
-    saveAll(all);
-    updatePreview();
-  }
-  function breakStart(){
-    const all = loadAll();
-    const ymd = jstYmd(now());
-    const day = ensureDay(all, ymd);
-    if(day.breakOpen){
-      alert("休憩中です（休憩解除を押してください）");
-      return;
-    }
-    const d = now();
-    day.breakOpen = { startTs: d.toISOString(), startTime: hhmm(d) };
-    saveAll(all);
-    updatePreview();
-  }
-  function breakEnd(){
-    const all = loadAll();
-    const ymd = jstYmd(now());
-    const day = ensureDay(all, ymd);
-    if(!day.breakOpen){
-      alert("休憩開始がありません");
-      return;
-    }
-    const start = new Date(day.breakOpen.startTs);
-    const end = now();
-    const minutes = Math.max(0, Math.round((end - start) / 60000));
-    day.breaks = day.breaks || [];
-    day.breaks.push({ start: day.breakOpen.startTime, end: hhmm(end), minutes });
-    day.breakOpen = null;
-    recalcTotal(day);
-    saveAll(all);
-    updatePreview();
-  }
-
-  if(btnOut) btnOut.addEventListener("click", setOut);
-  if(btnBack) btnBack.addEventListener("click", setBack);
-  if(btnBreakStart) btnBreakStart.addEventListener("click", breakStart);
-  if(btnBreakEnd) btnBreakEnd.addEventListener("click", breakEnd);
-
-  updatePreview();
-})();
-</script>
 
 
   <script>
