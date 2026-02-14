@@ -38,6 +38,8 @@
     .s-holiday{background:#f0ad00;color:#1d1d1d;}
     .s-absence{background:#d64545;}
     .s-part{background:#187FBF;}
+    .s-furidashi{background:#1c9b2d;}
+    .s-furikyu{background:#f0ad00;color:#1d1d1d;}
 
     .target-input{width:100%;box-sizing:border-box;border:1px solid var(--border);padding:3px 2px;font-size:11px;text-align:right;background:var(--surface-1);color:inherit;}
     td.muted, .muted .target-input{background:#e2e8ee !important;color:#6a7582 !important;}
@@ -126,9 +128,9 @@
   const SETTINGS_KEY='tsms_settings';
   const PLAN_KEY='tsms_sales_plan';
   const HOLIDAY_KEY='tsms_holidays_jp_v1';
-  const SHIFT_ORDER=['work','holiday','absence','part'];
-  const SHIFT_LABEL={work:'出勤',holiday:'休日',absence:'欠勤',part:'バイト'};
-  const SHIFT_CLASS={work:'s-work',holiday:'s-holiday',absence:'s-absence',part:'s-part'};
+  const SHIFT_ORDER=['work','holiday','absence','part','furidashi','furikyu'];
+  const SHIFT_LABEL={work:'出勤',holiday:'休日',absence:'欠勤',part:'バイト',furidashi:'振出',furikyu:'振休'};
+  const SHIFT_CLASS={work:'s-work',holiday:'s-holiday',absence:'s-absence',part:'s-part',furidashi:'s-furidashi',furikyu:'s-furikyu'};
 
   const defaults={taxRate:10,feeRate:4,goFeeYen:100,walkRate:50,closeStartDay:16,closeEndDay:15};
 
@@ -274,7 +276,7 @@
 
       const row=plan[dayId];
       const shift=row.shift;
-      const active=(shift==='work' || shift==='part');
+      const active=(shift==='work' || shift==='part' || shift==='furidashi');
       const pastLocked = dayId < todayId;
       const result=active?calcDayNet(dayId,reports,settings):0;
       const target=active?(Number(row.target)||0):0;
