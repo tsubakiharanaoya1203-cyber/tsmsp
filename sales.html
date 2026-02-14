@@ -9,7 +9,7 @@
       --bg:#fff; --text:#111; --muted:#666; --border:#999;
     }
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+      font-family:"Noto Sans JP", sans-serif;
       font-size:18px;
     }
     .app-header{position:sticky;top:0;background:#fff;border-bottom:2px solid var(--border);padding:12px 14px;z-index:10;}
@@ -62,6 +62,17 @@
   padding:0 14px 0 56px;
   font-weight:900; font-size:20px;
 }
+.header-to-report{
+  margin-left:auto;
+  border:2px solid #000;
+  padding:6px 10px;
+  font-size:14px;
+  font-weight:900;
+  color:#000;
+  text-decoration:none;
+  line-height:1.2;
+  background:#fff;
+}
 .tsms-hamburger{
   position:absolute; left:14px; top:50%;
   transform:translateY(-50%);
@@ -84,6 +95,7 @@
   text-decoration:none; color:#000;
   font-size:18px; font-weight:900;
 }
+.tsms-menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
 .tsms-menu-bg{
   position:fixed; inset:0;
   background:rgba(0,0,0,.25);
@@ -95,6 +107,41 @@
 .tsms-build{ font-size:12px; color:#666; padding:8px 12px; }
 /* -------------------------------------- */
 
+/* ---- Theme tokens ---- */
+:root{
+  --bg:#F3F6F8;
+  --surface-1:#FFFFFF;
+  --surface-2:#EEF3F6;
+  --border:#D5DEE6;
+  --text-primary:#0F1720;
+  --text-secondary:#344554;
+  --text-muted:#5B6D7C;
+  --accent:#2580ED;
+  --accent-hover:#4DA3FF;
+  --link:#187FBF;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1417;
+  --surface-1:#151C20;
+  --surface-2:#1B242A;
+  --border:#2A353D;
+  --text-primary:#E6EEF3;
+  --text-secondary:#B7C4CC;
+  --text-muted:#8A949A;
+  --accent:#3B95F0;
+  --accent-hover:#4DA3FF;
+  --link:#58C2FF;
+}
+html,body{ background:var(--bg)!important; color:var(--text-primary)!important; }
+a{ color:var(--link); }
+.tsms-header,.header,.app-header,.card,.wf-panel,.section,.date-switcher,.menu,.tsms-menu,.box{background:var(--surface-1)!important;border-color:var(--border)!important;color:var(--text-primary)!important;}
+.note,.wf-field-label,.label,.k,.idx,.tsms-build,.desc,.wf-subnote,.wf-field-label{color:var(--text-muted)!important;}
+.tsms-menu a,.menu a,.header-to-report,.btn,.actionBtn,.key,.input,select,.key.small{background:var(--surface-2)!important;color:var(--text-primary)!important;border-color:var(--border)!important;}
+.menu small,.tsms-menu small{color:var(--text-muted)!important;}
+.btn.next{background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important;}
+.menu-bg,.tsms-menu-bg{background:rgba(15,23,32,.35)!important;}
+/* ---- Theme tokens end ---- */
+
 </style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
@@ -103,17 +150,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="TSMS">
 
+  <script>(function(){try{var t=localStorage.getItem("tsms_theme")==="dark"?"dark":"light";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#0F1417":"#F3F6F8");}catch(e){}})();</script>
 </head>
 <body>
 
 <nav class="tsms-menu" id="tsmsMenu" aria-label="サイドメニュー">
-  <a href="index.html">TOP</a>
-  <a href="report.html">日報入力</a>
-  <a href="confirm.html">入力確認</a>
-  <a href="detail.html">詳細確認</a>
-  <a href="ops.html">出庫/帰庫/休憩</a>
-  <a href="sales.html">売上</a>
-  <a href="settings.html">設定</a>
+  <a href="index.html">TOP<small>メニュー一覧</small></a>
+  <a href="report.html">日報入力<small>乗車データを入力</small></a>
+  <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
+  <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
+  <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="tsms-menu-bg" id="tsmsMenuBg" aria-hidden="true"></div>
 
@@ -122,6 +170,7 @@
     <span></span><span></span><span></span>
   </div>
   売上
+  <a class="header-to-report" href="report.html">入力画面へ</a>
 </header>
 <div class="tsms-build"></div>
   </header>
