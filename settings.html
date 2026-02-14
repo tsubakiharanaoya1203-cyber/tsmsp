@@ -3,56 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>設定（準備中）</title>
+  <title>設定</title>
   <style>
-    :root{
-      --bg:#fff; --text:#111; --muted:#666; --border:#999;
-    }
+    :root{ --bg:#fff; --text:#111; --muted:#666; --border:#999; }
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+      font-family:"Noto Sans JP", sans-serif;
       font-size:18px;
     }
-    .app-header{position:sticky;top:0;background:#fff;border-bottom:2px solid var(--border);padding:12px 14px;z-index:10;}
-    .app-header h1{margin:0;font-size:20px;}
-    .main{padding:12px;}
-    .note{font-size:13px;color:var(--muted);line-height:1.35;margin:8px 0;}
-    /* Excel-ish panels */
-    .wf-panel{border:2px solid var(--border);background:#fff;margin:10px 0;padding:10px;}
-    .wf-label{font-weight:800;font-size:16px;margin:0 0 8px 0;}
-    .wf-subnote{font-size:12px;color:var(--muted);margin:-2px 0 8px 0;}
-    /* Square buttons (no rounding) */
-    .wf-row{display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;}
-    .btn{appearance:none;-webkit-appearance:none;border:2px solid var(--border);background:#fff;
-      border-radius:0;padding:14px 8px;font-size:16px;min-height:56px;
-    }
-    .btn.is-selected{border:4px solid #00ff00;}
-    .wf-form{display:grid;gap:10px;}
-    .wf-field{display:grid;gap:6px;}
-    .wf-field-label{font-size:13px;color:var(--muted);}
-    .input{width:100%;box-sizing:border-box;border:2px solid var(--border);border-radius:0;
-      padding:14px 10px;font-size:20px;min-height:56px;background:#fff;
-    }
-    .wf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
-    .is-hidden{display:none !important;}
-    /* Keypad 3x3 + bottom row */
-    .keypad{margin-top:10px;border-top:2px solid var(--border);padding-top:10px;}
-    .keypad-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}
-    .key{border:2px solid var(--border);border-radius:0;background:#fff;
-      min-height:60px;font-size:22px;
-    }
-    .key.small{font-size:16px;}
-    @media (max-width: 420px){
-      .wf-row{grid-template-columns:repeat(4, 1fr);}
-      .btn{font-size:15px;min-height:52px;padding:12px 6px;}
-    }
-    @media (min-width: 768px){
-      html{font-size:20px;}
-      .main{max-width:880px;margin:0 auto;}
-      .btn{font-size:18px;min-height:64px;}
-      .input{font-size:22px;min-height:64px;}
-      .key{min-height:72px;font-size:26px;}
-    }
-  
+    .main{padding:12px;max-width:880px;margin:0 auto;}
+    .section{border:2px solid var(--border);background:#fff;margin:10px 0;padding:10px;}
+    .title{font-weight:900;font-size:16px;margin:0 0 8px 0;}
+    .note{font-size:12px;color:var(--muted);line-height:1.35;margin:6px 0 10px 0;}
+    .field{display:grid;gap:6px;margin-bottom:10px;}
+    .label{font-size:13px;color:var(--muted);}
+    .input{width:100%;box-sizing:border-box;border:2px solid var(--border);border-radius:0;padding:12px 10px;font-size:18px;background:#fff;}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .btn{appearance:none;-webkit-appearance:none;border:2px solid var(--border);background:#fff;border-radius:0;padding:12px 8px;font-size:16px;min-height:52px;font-weight:900;}
+
 /* ---- TSMS Hamburger Menu (overlay) ---- */
 .tsms-header{
   position:sticky; top:0; z-index:100;
@@ -61,6 +28,17 @@
   display:flex; align-items:center;
   padding:0 14px 0 56px;
   font-weight:900; font-size:20px;
+}
+.header-to-report{
+  margin-left:auto;
+  border:2px solid #000;
+  padding:6px 10px;
+  font-size:14px;
+  font-weight:900;
+  color:#000;
+  text-decoration:none;
+  line-height:1.2;
+  background:#fff;
 }
 .tsms-hamburger{
   position:absolute; left:14px; top:50%;
@@ -84,6 +62,7 @@
   text-decoration:none; color:#000;
   font-size:18px; font-weight:900;
 }
+.tsms-menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
 .tsms-menu-bg{
   position:fixed; inset:0;
   background:rgba(0,0,0,.25);
@@ -92,8 +71,43 @@
   z-index:900;
 }
 .tsms-menu-bg.show{ opacity:1; pointer-events:auto; }
-.tsms-build{ font-size:12px; color:#666; padding:8px 12px; }
 /* -------------------------------------- */
+/* ---- Theme tokens ---- */
+:root{
+  --bg:#F3F6F8;
+  --surface-1:#FFFFFF;
+  --surface-2:#EEF3F6;
+  --border:#D5DEE6;
+  --text-primary:#0F1720;
+  --text-secondary:#344554;
+  --text-muted:#5B6D7C;
+  --accent:#2580ED;
+  --accent-hover:#4DA3FF;
+  --link:#187FBF;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1417;
+  --surface-1:#151C20;
+  --surface-2:#1B242A;
+  --border:#2A353D;
+  --text-primary:#E6EEF3;
+  --text-secondary:#B7C4CC;
+  --text-muted:#8A949A;
+  --accent:#3B95F0;
+  --accent-hover:#4DA3FF;
+  --link:#58C2FF;
+}
+html,body{ background:var(--bg)!important; color:var(--text-primary)!important; }
+a{ color:var(--link); }
+.tsms-header,.header,.app-header,.card,.wf-panel,.section,.date-switcher,.menu,.tsms-menu,.box{background:var(--surface-1)!important;border-color:var(--border)!important;color:var(--text-primary)!important;}
+.note,.wf-field-label,.label,.k,.idx,.desc,.wf-subnote,.wf-field-label{color:var(--text-muted)!important;}
+.tsms-menu a,.menu a,.header-to-report,.btn,.actionBtn,.key,.input,select,.key.small{background:var(--surface-2)!important;color:var(--text-primary)!important;border-color:var(--border)!important;}
+.menu small,.tsms-menu small{color:var(--text-muted)!important;}
+.btn.next{background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important;}
+.menu-bg,.tsms-menu-bg{background:rgba(15,23,32,.35)!important;}
+
+.hamburger span,.tsms-hamburger span{background:#58C2FF!important;}
+/* ---- Theme tokens end ---- */
 
 </style>
   <link rel="manifest" href="manifest.json">
@@ -102,265 +116,130 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="TSMS">
+  <script>(function(){try{var t=localStorage.getItem("tsms_theme")==="dark"?"dark":"light";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#0F1417":"#F3F6F8");}catch(e){}})();</script>
+
+<style id="tsms-bottom-nav-style">
+  body{padding-bottom:78px;}
+  .tsms-hamburger,.hamburger,.tsms-menu,.menu,.tsms-menu-bg,.menu-bg{display:none!important;}
+  .tsms-header,.header{padding-left:14px!important;}
+  .tsms-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:1200;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface-1,#fff);border-top:2px solid var(--border,#ccc);padding-bottom:env(safe-area-inset-bottom);}
+  .tsms-bottom-nav a,.tsms-bottom-nav button{appearance:none;border:0;background:transparent;color:var(--text-secondary,#445);font:inherit;font-size:11px;font-weight:900;padding:8px 2px 9px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;}
+  .tsms-bottom-nav .ico{font-size:16px;line-height:1;color:#58C2FF;}
+  .tsms-bottom-nav .active{color:var(--text-primary,#111);position:relative;}
+  .tsms-bottom-nav .active::before{content:"";position:absolute;top:0;left:14%;right:14%;height:2px;background:#58C2FF;}
+  .tsms-more-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1300;background:var(--surface-1,#fff);border-top:2px solid var(--border,#ccc);transform:translateY(110%);transition:transform .2s ease;padding:12px 12px calc(12px + env(safe-area-inset-bottom));}
+  .tsms-more-sheet.show{transform:translateY(0);}
+  .tsms-more-sheet a{display:block;padding:12px;border:2px solid var(--border,#ccc);margin-top:8px;text-decoration:none;color:var(--text-primary,#111);background:var(--surface-2,#f5f5f5);font-weight:900;}
+  .tsms-more-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;z-index:1250;transition:opacity .2s;}
+  .tsms-more-bg.show{opacity:1;pointer-events:auto;}
+</style>
 
 </head>
 <body>
-
 <nav class="tsms-menu" id="tsmsMenu" aria-label="サイドメニュー">
-  <a href="index.html">TOP</a>
-  <a href="report.html">日報入力</a>
-  <a href="confirm.html">入力確認</a>
-  <a href="detail.html">詳細確認</a>
-  <a href="ops.html">出庫/帰庫/休憩</a>
-  <a href="sales.html">売上</a>
-  <a href="settings.html">設定</a>
+  <a href="index.html">TOP<small>メニュー一覧</small></a>
+  <a href="report.html">日報入力<small>乗車データを入力</small></a>
+  <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
+  <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
+  <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="tsms-menu-bg" id="tsmsMenuBg" aria-hidden="true"></div>
 
 <header class="tsms-header">
-  <div class="tsms-hamburger" id="tsmsHamburger" role="button" tabindex="0" aria-label="メニュー">
-    <span></span><span></span><span></span>
-  </div>
+  <div class="tsms-hamburger" id="tsmsHamburger" role="button" tabindex="0" aria-label="メニュー"><span></span><span></span><span></span></div>
   設定
+  <a class="header-to-report" href="report.html">入力画面へ</a>
 </header>
-<div class="tsms-build"></div>
-  </header>
 
-  <main class="main">
-  <section class="wf-panel">
-    <div class="wf-label">設定</div>
-    <div class="note">このページは準備中です。</div>
-    <div class="wf-actions">
-      <a class="btn" href="index.html" style="display:inline-block;text-decoration:none;line-height:44px;text-align:center;">TOPへ戻る</a>
-      <a class="btn" href="report.html" style="display:inline-block;text-decoration:none;line-height:44px;text-align:center;">日報入力へ</a>
+<main class="main">
+  <section class="section">
+    <div class="title">歩率・計算設定</div>
+    <div class="note">詳細確認ページの概算計算で使う設定です。</div>
+
+    <div class="field">
+      <div class="label">表示モード</div>
+      <select class="input" id="themeMode">
+        <option value="light">ライトモード（Soft Light）</option>
+        <option value="dark">ダークモード（Soft Dark）</option>
+      </select>
+    </div>
+
+    <div class="field"><div class="label">消費税率（%）</div><input class="input" id="taxRate" inputmode="decimal"></div>
+    <div class="field"><div class="label">決済手数料率（%）</div><input class="input" id="feeRate" inputmode="decimal"></div>
+    <div class="field"><div class="label">GO手配料（円/件）</div><input class="input" id="goFeeYen" inputmode="numeric"></div>
+    <div class="field"><div class="label">歩率（%）</div><input class="input" id="walkRate" inputmode="decimal"></div>
+  </section>
+
+  <section class="section">
+    <div class="title">締め期間・シフト</div>
+    <div class="note">現状ある分として保存だけ先に作成しています。</div>
+
+    <div class="field"><div class="label">締め開始日（1〜31）</div><input class="input" id="closeStartDay" inputmode="numeric"></div>
+    <div class="field"><div class="label">締め終了日（1〜31）</div><input class="input" id="closeEndDay" inputmode="numeric"></div>
+    <div class="field"><div class="label">シフトメモ</div><input class="input" id="shiftNote"></div>
+
+    <div class="actions">
+      <button class="btn" id="btnSave" type="button">保存</button>
+      <button class="btn" id="btnReset" type="button">初期値に戻す</button>
     </div>
   </section>
 </main>
 
+<script>
+(function(){
+  const KEY = "tsms_settings";
+  const defaults = { taxRate:10, feeRate:4, goFeeYen:100, walkRate:50, closeStartDay:1, closeEndDay:31, shiftNote:"" };
 
-  <script>
-    // ===== Rules + keypad (self-contained) =====
-    const state = {rideType:"", payMethod:"", ticketSub:""};
-    const secTicket = document.getElementById("sec_ticketSub");
-    const rowCash = document.getElementById("row_cash");
-    const rowCredit = document.getElementById("row_credit");
-    const inCash = document.getElementById("in_cash");
-    const inCredit = document.getElementById("in_credit");
-    const inNote = document.getElementById("in_note");
-    let focused = inCash;
-
-    function clearSelected(group){
-      document.querySelectorAll(`button[data-group="${group}"]`).forEach(b=>b.classList.remove("is-selected"));
-    }
-    
-function selectBtn(group, btn){
-  const already = btn.classList.contains("is-selected");
-  clearSelected(group);
-  if(!already){
-    btn.classList.add("is-selected");
-    return true; // now selected
+  function load(){
+    try{
+      const x = JSON.parse(localStorage.getItem(KEY) || "null");
+      return Object.assign({}, defaults, (x && typeof x === "object") ? x : {});
+    }catch(_){ return Object.assign({}, defaults); }
   }
-  return false; // now unselected
-}
+  function save(v){ localStorage.setItem(KEY, JSON.stringify(v)); }
 
-    function applyPayRules(){
-      if(state.payMethod === "チケット他") secTicket.classList.remove("is-hidden");
-      else secTicket.classList.add("is-hidden");
+  const ids = ["themeMode","taxRate","feeRate","goFeeYen","walkRate","closeStartDay","closeEndDay","shiftNote"];
+  const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
 
-      if(state.payMethod === "現金"){
-        rowCash.classList.remove("is-hidden");
-        rowCredit.classList.add("is-hidden");
-        focused = inCash;
-      } else if(state.payMethod === "チケット他"){
-        rowCash.classList.remove("is-hidden");
-        rowCredit.classList.remove("is-hidden");
-        focused = inCredit;
-      } else {
-        rowCash.classList.add("is-hidden");
-        rowCredit.classList.remove("is-hidden");
-        focused = inCredit;
-      }
-
-    const secAmounts = document.getElementById("sec_amounts");
-
-    function scrollToAmountsIfReady(){
-      // 乗車種別＋支払方法が両方決まったら、金額入力へスクロール＆フォーカス
-      if(!state.rideType || !state.payMethod) return;
-      // DOMの表示切替が反映されてからスクロールしたいので少し待つ
-      setTimeout(()=>{
-        if(secAmounts) secAmounts.scrollIntoView({behavior:"smooth", block:"start"});
-        // 表示されている入力にフォーカス
-        if(state.payMethod === "現金") inCash.focus();
-        else inCredit.focus();
-      }, 50);
-    }
-
-    }
-
-    document.addEventListener("click", (e)=>{
-      const btn = e.target.closest("button[data-group]");
-      
-if(btn){
-  const g = btn.dataset.group;
-  const v = btn.dataset.value || btn.textContent.trim();
-
-  const selected = selectBtn(g, btn);
-
-  if(g === "rideType") state.rideType = selected ? v : "";
-  if(g === "payMethod"){
-    state.payMethod = selected ? v : "";
-    if(!selected){
-      state.ticketSub = "";
-      clearSelected("ticketSub");
-    }
-    applyPayRules();
+  function applyTheme(mode){
+    const m = (mode === "dark") ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", m);
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if(themeMeta) themeMeta.setAttribute("content", m === "dark" ? "#0F1417" : "#F3F6F8");
+    localStorage.setItem("tsms_theme", m);
   }
-  if(g === "ticketSub") state.ticketSub = selected ? v : "";
 
-  if((g === "rideType" || g === "payMethod") && selected){
-    scrollToAmountsIfReady();
+  function fill(v){
+    const mode = localStorage.getItem("tsms_theme") || "light";
+    if(els.themeMode) els.themeMode.value = mode;
+    ids.filter(id=>id!=="themeMode").forEach(id => { if(els[id]) els[id].value = String(v[id] ?? ""); });
   }
-  return;
-}
+  function values(){
+    const getNum = (id, fallback) => {
+      const n = Number((els[id].value || "").trim());
+      return Number.isFinite(n) ? n : fallback;
+    };
+    return {
+      taxRate: getNum("taxRate", defaults.taxRate),
+      feeRate: getNum("feeRate", defaults.feeRate),
+      goFeeYen: getNum("goFeeYen", defaults.goFeeYen),
+      walkRate: getNum("walkRate", defaults.walkRate),
+      closeStartDay: getNum("closeStartDay", defaults.closeStartDay),
+      closeEndDay: getNum("closeEndDay", defaults.closeEndDay),
+      shiftNote: (els.shiftNote.value || "").trim()
+    };
+  }
 
-
-      const keyBtn = e.target.closest("button[data-key]");
-      if(keyBtn){
-        const k = keyBtn.dataset.key;
-        if(!focused) return;
-        const cur = String(focused.value||"");
-        if(k === "clear") focused.value = "";
-        else if(k === "back") focused.value = cur.slice(0,-1);
-        else if(/^[0-9]$/.test(k)) focused.value = cur + k;
-        focused.focus();
-        return;
-      }
-    });
-
-    [inCash, inCredit].forEach(inp=>{
-      inp.addEventListener("focus", ()=>focused = inp);
-      inp.addEventListener("click", ()=>focused = inp);
-    });
-
-    document.getElementById("btn_clear").addEventListener("click", ()=>{
-      state.rideType=""; state.payMethod=""; state.ticketSub="";
-      document.querySelectorAll("button").forEach(b=>b.classList.remove("is-selected"));
-      inCash.value=""; inCredit.value=""; inNote.value="";
-      rowCash.classList.remove("is-hidden");
-      rowCredit.classList.remove("is-hidden");
-      secTicket.classList.add("is-hidden");
-      focused = inCash;
-    });
-
-    document.getElementById("btn_submit").addEventListener("click", ()=>{
-      // --- Save to localStorage (for GitHub Pages review) ---
-      if(!state.rideType || !state.payMethod){
-        alert("乗車種別と支払方法を選んでください");
-        return;
-      }
-
-      const cash = (inCash.value||"").trim();
-      const credit = (inCredit.value||"").trim();
-
-      if(!cash && !credit){
-        alert("現収か未収のどちらかに金額を入力してください");
-        return;
-      }
-
-      const now = new Date();
-      const hh = String(now.getHours()).padStart(2,"0");
-      const mm = String(now.getMinutes()).padStart(2,"0");
-
-      const entry = {
-        id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)),
-        time: `${hh}:${mm}`,
-        ts: now.toISOString(),
-        rideType: state.rideType,
-        payMethod: state.payMethod,
-        ticketSub: state.ticketSub || "",
-        cash: cash ? Number(cash.replace(/[^0-9]/g,"")) : 0,
-        credit: credit ? Number(credit.replace(/[^0-9]/g,"")) : 0,
-        note: (inNote.value||"").trim()
-      };
-
-      const params = new URLSearchParams(location.search);
-      const editId = params.get("edit");
-
-      let list = [];
-      try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch(e) { list = []; }
-
-      if(editId){
-        const idx = list.findIndex(x=>x.id===editId);
-        if(idx >= 0){
-          entry.id = editId;
-          list[idx] = entry;
-        } else {
-          list.unshift(entry);
-        }
-        localStorage.removeItem("tsms_edit_id");
-      } else {
-        list.unshift(entry);
-      }
-
-      localStorage.setItem("tsms_reports", JSON.stringify(list));
-
-      // clear form (keep UI rules)
-      document.getElementById("btn_clear").click();
-
-      // go confirm
-      location.href = "confirm.html";
-    });
-
-    
-    // --- Load for edit (from confirm page) ---
-    (function(){
-      const params = new URLSearchParams(location.search);
-      const editId = params.get("edit");
-      if(!editId) return;
-
-      let list = [];
-      try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch(e) { list = []; }
-      const e = list.find(x=>x.id===editId);
-      if(!e) return;
-
-      // restore selections
-      state.rideType = e.rideType || "";
-      state.payMethod = e.payMethod || "";
-      state.ticketSub = e.ticketSub || "";
-
-      // select buttons by matching dataset value/text
-      document.querySelectorAll('button[data-group="rideType"]').forEach(b=>{
-        const v = b.dataset.value || b.textContent.trim();
-        if(v === state.rideType) { b.classList.add("is-selected"); }
-      });
-      document.querySelectorAll('button[data-group="payMethod"]').forEach(b=>{
-        const v = b.dataset.value || b.textContent.trim();
-        if(v === state.payMethod) { b.classList.add("is-selected"); }
-      });
-
-      applyPayRules();
-      if(state.payMethod === "チケット"){
-        secTicket.classList.remove("is-hidden");
-        document.querySelectorAll('button[data-group="ticketSub"]').forEach(b=>{
-          const v = b.dataset.value || b.textContent.trim();
-          if(v === state.ticketSub) { b.classList.add("is-selected"); }
-        });
-      }
-
-      inCash.value = e.cash ? String(e.cash) : "";
-      inCredit.value = e.credit ? String(e.credit) : "";
-      inNote.value = e.note || "";
-      focused = inCash;
-
-      // scroll to amounts
-      setTimeout(scrollToAmountsIfReady, 50);
-    })();
-
-
-    // init
-    secTicket.classList.add("is-hidden");
-    applyPayRules();
-  </script>
+  fill(load());
+  if(els.themeMode){
+    els.themeMode.addEventListener("change", ()=> applyTheme(els.themeMode.value));
+  }
+  document.getElementById("btnSave").addEventListener("click", ()=>{ save(values()); applyTheme(els.themeMode.value); alert("設定を保存しました"); });
+  document.getElementById("btnReset").addEventListener("click", ()=>{ if(!confirm("初期値に戻しますか？")) return; fill(defaults); save(defaults); applyTheme("light"); if(els.themeMode) els.themeMode.value = "light"; });
+})();
+</script>
 
 <script>
 (function(){
@@ -368,301 +247,65 @@ if(btn){
   const bg = document.getElementById("tsmsMenuBg");
   const burger = document.getElementById("tsmsHamburger");
   if(!menu || !bg || !burger) return;
-
   function openMenu(){ menu.classList.add("open"); bg.classList.add("show"); }
   function closeMenu(){ menu.classList.remove("open"); bg.classList.remove("show"); }
-
   burger.addEventListener("click", openMenu);
   burger.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" ") openMenu(); });
   bg.addEventListener("click", closeMenu);
-  menu.querySelectorAll("a").forEach(a=>a.addEventListener("click", closeMenu));
+  menu.querySelectorAll("a").forEach((a)=>a.addEventListener("click", closeMenu));
 })();
 </script>
 
-
-
-
 <script>
-/* --- Scroll fix (ONLY): rideType + payMethod + ticketSub -> scroll control --- */
-(function(){
-  const secAmounts = document.getElementById("sec_amounts");
-  const secTicketSub = document.getElementById("sec_ticketSub");
-  const rowCash = document.getElementById("row_cash");
-  const rowCredit = document.getElementById("row_credit");
-  const inCash = document.getElementById("in_cash");
-  const inCredit = document.getElementById("in_credit");
-
-  function isVisible(el){
-    return el && !el.classList.contains("is-hidden") && el.offsetParent !== null;
-  }
-
-  function getSelectedValue(group){
-    const b = document.querySelector(`button[data-group="${group}"].is-selected`);
-    return b ? (b.dataset.value || b.textContent.trim()) : "";
-  }
-
-  function scrollToAmounts(){
-    let target = null;
-    const pay = getSelectedValue("payMethod");
-    const cashVisible = isVisible(rowCash);
-    const creditVisible = isVisible(rowCredit);
-
-    if(cashVisible && pay === "現金") target = inCash;
-    else if(creditVisible) target = inCredit;
-    else if(cashVisible) target = inCash;
-    else target = inCredit || inCash;
-
-    if(secAmounts){
-      secAmounts.scrollIntoView({behavior:"smooth", block:"start"});
-    } else if(target){
-      target.scrollIntoView({behavior:"smooth", block:"center"});
-    }
-
-    setTimeout(()=>{
-      try{
-        if(target){
-          target.focus({preventScroll:true});
-          if(typeof target.select === "function") target.select();
-        }
-      }catch(e){}
-    }, 120);
-  }
-
-  function run(){
-    const ride = getSelectedValue("rideType");
-    const pay  = getSelectedValue("payMethod");
-    const ticketSub = getSelectedValue("ticketSub");
-
-    if(!ride || !pay) return;
-
-    // ① チケット他 → 追加選択へ
-    if(pay === "チケット他" && !ticketSub && isVisible(secTicketSub)){
-      secTicketSub.scrollIntoView({behavior:"smooth", block:"start"});
-      return;
-    }
-
-    // ② チケット他で追加選択完了 → 金額入力へ
-    if(pay === "チケット他" && ticketSub){
-      scrollToAmounts();
-      return;
-    }
-
-    // ③ 通常 → 金額入力へ
-    scrollToAmounts();
-  }
-
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest('button[data-group="rideType"],button[data-group="payMethod"],button[data-group="ticketSub"]');
-    if(!btn) return;
-    setTimeout(run, 0);
-  }, true);
-})();
+  (function(){if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){window.addEventListener('load', function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();
 </script>
 
-
-
-
+<nav class="tsms-bottom-nav" aria-label="ボトムメニュー">
+  <a href="report.html" data-tab="report"><span class="ico">📝</span><span>日報入力</span></a>
+  <a href="confirm.html" data-tab="confirm"><span class="ico">✅</span><span>入力確認</span></a>
+  <a href="detail.html" data-tab="detail"><span class="ico">📊</span><span>詳細確認</span></a>
+  <a href="ops.html" data-tab="ops"><span class="ico">🚕</span><span>出庫/帰庫</span></a>
+  <button type="button" id="tsmsMoreBtn"><span class="ico">⋯</span><span>その他</span></button>
+</nav>
+<div class="tsms-more-bg" id="tsmsMoreBg"></div>
+<div class="tsms-more-sheet" id="tsmsMoreSheet" aria-label="その他メニュー">
+  <a href="index.html">TOP</a>
+  <a href="sales.html">月次売上</a>
+  <a href="settings.html">設定</a>
+</div>
 <script>
-/* --- Clear confirm dialog ONLY --- */
 (function(){
-  const btn = document.getElementById("btn_clear");
-  if(!btn) return;
-
-  btn.addEventListener("click", function(e){
-    // stop original handler temporarily
-    e.stopImmediatePropagation();
-
-    const ok = true;
-    if(ok){
-      // trigger original click again without this interceptor
-      btn.removeEventListener("click", arguments.callee, true);
-      btn.click();
-    }
-    // if cancel: do nothing
-  }, true);
-})();
-</script>
-
-
-
-<script>
-/* --- Register confirm + save + success + delayed redirect ONLY --- */
-(function(){
-  const btn = document.getElementById("btn_submit");
-  if(!btn) return;
-
-  // avoid double-binding
-  if(btn.dataset.boundRegisterConfirm === "1") return;
-  btn.dataset.boundRegisterConfirm = "1";
-
-  btn.addEventListener("click", function(e){
-    // block other handlers so we control register flow
-    e.preventDefault();
-    e.stopImmediatePropagation();
-
-    const ok = confirm("登録しますか？\n\nはい = OK\nいいえ = キャンセル");
-    if(!ok) return;
-
-    try{
-      const ride = document.querySelector('button[data-group="rideType"].is-selected');
-      const pay  = document.querySelector('button[data-group="payMethod"].is-selected');
-      const ticket = document.querySelector('button[data-group="ticketSub"].is-selected');
-
-      const cash = document.getElementById("in_cash")?.value || "";
-      const credit = document.getElementById("in_credit")?.value || "";
-
-      const record = {
-        time: new Date().toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}),
-        rideType: ride ? (ride.dataset.value || ride.innerText.trim()) : "",
-        payMethod: pay ? (pay.dataset.value || pay.innerText.trim()) : "",
-        ticketSub: ticket ? (ticket.dataset.value || ticket.innerText.trim()) : "",
-        cash: cash,
-        credit: credit,
-        ts: new Date().toISOString()
-      };
-
-      const KEY = "tsms_reports";
-      const EDIT_INDEX_KEY = "tsms_edit_index";
-      const EDIT_RECORD_KEY = "tsms_edit_record";
-      const list = JSON.parse(localStorage.getItem(KEY) || "[]");
-      const editIdxRaw = localStorage.getItem(EDIT_INDEX_KEY);
-      const editIdx = (editIdxRaw !== null && editIdxRaw !== "") ? Number(editIdxRaw) : null;
-      if(editIdx !== null && !Number.isNaN(editIdx) && list[editIdx]){
-        list[editIdx] = record; // order unchanged
-        localStorage.removeItem(EDIT_INDEX_KEY);
-        localStorage.removeItem(EDIT_RECORD_KEY);
-      } else {
-        list.push(record);
+  var page=(location.pathname.split('/').pop()||'index.html').replace('.html','');
+  document.querySelectorAll('.tsms-bottom-nav [data-tab]').forEach(function(a){
+    if(a.getAttribute('data-tab')===page) a.classList.add('active');
+  });
+  var btn=document.getElementById('tsmsMoreBtn');
+  var bg=document.getElementById('tsmsMoreBg');
+  var sheet=document.getElementById('tsmsMoreSheet');
+  function closeMore(){sheet.classList.remove('show');bg.classList.remove('show');}
+  if(btn&&bg&&sheet){
+    btn.addEventListener('click',function(){sheet.classList.add('show');bg.classList.add('show');});
+    bg.addEventListener('click',closeMore);
+  }
+  var guard = page==='report';
+  function isDirtyReport(){
+    var cash=document.getElementById('in_cash');
+    var credit=document.getElementById('in_credit');
+    var note=document.getElementById('in_note');
+    var hasVal=((cash&&cash.value)||(credit&&credit.value)||(note&&note.value));
+    var selected=document.querySelector('button[data-group].is-selected');
+    return !!(hasVal||selected);
+  }
+  document.querySelectorAll('.tsms-bottom-nav a, .tsms-more-sheet a').forEach(function(a){
+    a.addEventListener('click',function(e){
+      if(guard && isDirtyReport() && !confirm('入力を中止しますか？')){
+        e.preventDefault();
       }
-      localStorage.setItem(KEY, JSON.stringify(list));
-
-      alert("登録しました！");
-
-      setTimeout(()=>{
-        location.href = "confirm.html";
-      }, 3000);
-
-    }catch(err){
-      console.error("register confirm error", err);
-      alert("登録に失敗しました（エラー）");
-    }
-  }, true);
+      closeMore();
+    });
+  });
 })();
 </script>
-
-
-
-
-<script>
-/* --- Clear confirm dialog (FIX): actually clears all selected + amounts --- */
-(function(){
-  const btn = document.getElementById("btn_clear");
-  if(!btn) return;
-
-  // bind once
-  if(btn.dataset.boundClearConfirmFix === "1") return;
-  btn.dataset.boundClearConfirmFix = "1";
-
-  btn.addEventListener("click", function(e){
-    // take over clear flow, keep everything else unchanged
-    e.preventDefault();
-    e.stopImmediatePropagation();
-
-    const ok = confirm("削除してよろしいですか？\n\nいいえ = キャンセル\nはい = OK");
-    if(!ok) return;
-
-    try{
-      // Use existing globals/ids from the page (do not change any other behavior)
-      // state / rowCash / rowCredit / secTicket / inCash / inCredit / inNote / focused are defined in the main script scope.
-      if(typeof state === "object"){
-        state.rideType = "";
-        state.payMethod = "";
-        state.ticketSub = "";
-      }
-
-      document.querySelectorAll("button").forEach(b=>b.classList.remove("is-selected"));
-
-      const inCash = document.getElementById("in_cash");
-      const inCredit = document.getElementById("in_credit");
-      const inNote = document.getElementById("in_note");
-      if(inCash) inCash.value = "";
-      if(inCredit) inCredit.value = "";
-      if(inNote) inNote.value = "";
-
-      const rowCash = document.getElementById("row_cash");
-      const rowCredit = document.getElementById("row_credit");
-      const secTicket = document.getElementById("sec_ticketSub");
-
-      if(rowCash) rowCash.classList.remove("is-hidden");
-      if(rowCredit) rowCredit.classList.remove("is-hidden");
-      if(secTicket) secTicket.classList.add("is-hidden");
-
-      // reset focus to cash
-      try{
-        if(inCash){
-          inCash.focus({preventScroll:true});
-          if(typeof inCash.select === "function") inCash.select();
-        }
-      }catch(err){}
-    }catch(err){
-      console.error("clear fix error", err);
-    }
-  }, true);
-})();
-</script>
-
-
-<script>
-/* --- Prefill for edit (ONLY) --- */
-(function(){
-  const EDIT_RECORD_KEY = "tsms_edit_record";
-  const raw = localStorage.getItem(EDIT_RECORD_KEY);
-  if(!raw) return;
-
-  let rec = null;
-  try{ rec = JSON.parse(raw); }catch(e){ return; }
-  if(!rec) return;
-
-  // Helper: click button by group + label/value (uses existing logic)
-  function clickMatch(group, value){
-    const btns = Array.from(document.querySelectorAll(`button[data-group="${group}"]`));
-    const b = btns.find(x => (x.dataset.value||"").trim() === String(value).trim())
-          || btns.find(x => (x.textContent||"").trim() === String(value).trim());
-    if(b) b.click();
-  }
-
-  // Prefill selections
-  if(rec.rideType) clickMatch("rideType", rec.rideType);
-  if(rec.payMethod) clickMatch("payMethod", rec.payMethod);
-  if(rec.ticketSub) clickMatch("ticketSub", rec.ticketSub);
-
-  // Prefill amounts & note
-  const inCash = document.getElementById("in_cash");
-  const inCredit = document.getElementById("in_credit");
-  const inNote = document.getElementById("in_note");
-  if(inCash) inCash.value = rec.cash || "";
-  if(inCredit) inCredit.value = rec.credit || "";
-  if(inNote) inNote.value = rec.note || "";
-
-  // Focus appropriate input
-  setTimeout(()=>{
-    try{
-      if(inCredit && rec.credit){
-        inCredit.focus({preventScroll:true});
-        if(typeof inCredit.select === "function") inCredit.select();
-      } else if(inCash){
-        inCash.focus({preventScroll:true});
-        if(typeof inCash.select === "function") inCash.select();
-      }
-    }catch(e){}
-  }, 150);
-})();
-</script>
-
-
-  <script>
-    (function(){if('serviceWorker'in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();
-  </script>
 
 </body>
 </html>
