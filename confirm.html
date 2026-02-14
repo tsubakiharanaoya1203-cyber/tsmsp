@@ -58,6 +58,7 @@
     text-decoration:none; color:#000;
     font-size:18px; font-weight:900;
   }
+  .tsms-menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
   .tsms-menu-bg{
     position:fixed; inset:0;
     background:rgba(0,0,0,.25);
@@ -79,13 +80,13 @@
 <body>
 <div class="wrap">
 <nav class="tsms-menu" id="tsmsMenu" aria-label="サイドメニュー">
-  <a href="index.html">TOP</a>
-  <a href="report.html">日報入力</a>
-  <a href="confirm.html">入力確認</a>
-  <a href="detail.html">詳細確認</a>
-  <a href="ops.html">出庫/帰庫/休憩</a>
-  <a href="sales.html">売上</a>
-  <a href="settings.html">設定</a>
+  <a href="index.html">TOP<small>メニュー一覧</small></a>
+  <a href="report.html">日報入力<small>乗車データを入力</small></a>
+  <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
+  <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
+  <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="tsms-menu-bg" id="tsmsMenuBg" aria-hidden="true"></div>
 <header class="tsms-header">
