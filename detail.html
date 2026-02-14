@@ -119,6 +119,23 @@ a{ color:var(--link); }
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="TSMS">
   <script>(function(){try{var t=localStorage.getItem("tsms_theme")==="dark"?"dark":"light";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#0F1417":"#F3F6F8");}catch(e){}})();</script>
+
+<style id="tsms-bottom-nav-style">
+  body{padding-bottom:78px;}
+  .tsms-hamburger,.hamburger,.tsms-menu,.menu,.tsms-menu-bg,.menu-bg{display:none!important;}
+  .tsms-header,.header{padding-left:14px!important;}
+  .tsms-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:1200;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface-1,#fff);border-top:2px solid var(--border,#ccc);padding-bottom:env(safe-area-inset-bottom);}
+  .tsms-bottom-nav a,.tsms-bottom-nav button{appearance:none;border:0;background:transparent;color:var(--text-secondary,#445);font:inherit;font-size:11px;font-weight:900;padding:8px 2px 9px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;}
+  .tsms-bottom-nav .ico{font-size:16px;line-height:1;color:#58C2FF;}
+  .tsms-bottom-nav .active{color:var(--text-primary,#111);position:relative;}
+  .tsms-bottom-nav .active::before{content:"";position:absolute;top:0;left:14%;right:14%;height:2px;background:#58C2FF;}
+  .tsms-more-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1300;background:var(--surface-1,#fff);border-top:2px solid var(--border,#ccc);transform:translateY(110%);transition:transform .2s ease;padding:12px 12px calc(12px + env(safe-area-inset-bottom));}
+  .tsms-more-sheet.show{transform:translateY(0);}
+  .tsms-more-sheet a{display:block;padding:12px;border:2px solid var(--border,#ccc);margin-top:8px;text-decoration:none;color:var(--text-primary,#111);background:var(--surface-2,#f5f5f5);font-weight:900;}
+  .tsms-more-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;z-index:1250;transition:opacity .2s;}
+  .tsms-more-bg.show{opacity:1;pointer-events:auto;}
+</style>
+
 </head>
 <body>
 <nav class="tsms-menu" id="tsmsMenu" aria-label="サイドメニュー">
@@ -295,5 +312,53 @@ a{ color:var(--link); }
 <script>
   (function(){if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){window.addEventListener('load', function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();
 </script>
+
+<nav class="tsms-bottom-nav" aria-label="ボトムメニュー">
+  <a href="report.html" data-tab="report"><span class="ico">📝</span><span>日報入力</span></a>
+  <a href="confirm.html" data-tab="confirm"><span class="ico">✅</span><span>入力確認</span></a>
+  <a href="detail.html" data-tab="detail"><span class="ico">📊</span><span>詳細確認</span></a>
+  <a href="ops.html" data-tab="ops"><span class="ico">🚕</span><span>出庫/帰庫</span></a>
+  <button type="button" id="tsmsMoreBtn"><span class="ico">⋯</span><span>その他</span></button>
+</nav>
+<div class="tsms-more-bg" id="tsmsMoreBg"></div>
+<div class="tsms-more-sheet" id="tsmsMoreSheet" aria-label="その他メニュー">
+  <a href="index.html">TOP</a>
+  <a href="sales.html">月次売上</a>
+  <a href="settings.html">設定</a>
+</div>
+<script>
+(function(){
+  var page=(location.pathname.split('/').pop()||'index.html').replace('.html','');
+  document.querySelectorAll('.tsms-bottom-nav [data-tab]').forEach(function(a){
+    if(a.getAttribute('data-tab')===page) a.classList.add('active');
+  });
+  var btn=document.getElementById('tsmsMoreBtn');
+  var bg=document.getElementById('tsmsMoreBg');
+  var sheet=document.getElementById('tsmsMoreSheet');
+  function closeMore(){sheet.classList.remove('show');bg.classList.remove('show');}
+  if(btn&&bg&&sheet){
+    btn.addEventListener('click',function(){sheet.classList.add('show');bg.classList.add('show');});
+    bg.addEventListener('click',closeMore);
+  }
+  var guard = page==='report';
+  function isDirtyReport(){
+    var cash=document.getElementById('in_cash');
+    var credit=document.getElementById('in_credit');
+    var note=document.getElementById('in_note');
+    var hasVal=((cash&&cash.value)||(credit&&credit.value)||(note&&note.value));
+    var selected=document.querySelector('button[data-group].is-selected');
+    return !!(hasVal||selected);
+  }
+  document.querySelectorAll('.tsms-bottom-nav a, .tsms-more-sheet a').forEach(function(a){
+    a.addEventListener('click',function(e){
+      if(guard && isDirtyReport() && !confirm('入力を中止しますか？')){
+        e.preventDefault();
+      }
+      closeMore();
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
