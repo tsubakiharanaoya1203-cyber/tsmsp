@@ -258,8 +258,6 @@ a{ color:var(--link); }
       lines.push(`<div class="row"><span class="label">乗車種別</span><span>${esc(r.rideType||"")}</span></div>`);
       lines.push(`<div class="row underline-dashed"><span class="label">支払い方法</span><span>${esc(r.payMethod||"")}</span></div>`);
       if(r.ticketSub) lines.push(`<div class="row"><span class="label">チケット区分</span><span>${esc(r.ticketSub)}</span></div>`);
-      const resultTotal = Number(r.cash||0) + Number(r.credit||0);
-      lines.push(`<div class="row underline-dashed"><span class="label">結果</span><span>${esc(yen(resultTotal))}</span></div>`);
       if(Number(r.cash||0) > 0) lines.push(`<div class="row"><span class="label">現収</span><span>${esc(yen(r.cash))}</span></div>`);
       if(Number(r.credit||0) > 0) lines.push(`<div class="row"><span class="label">未収</span><span>${esc(yen(r.credit))}</span></div>`);
       if(r.note) lines.push(`<div class="note">${esc(r.note)}</div>`);
