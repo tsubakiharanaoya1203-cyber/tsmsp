@@ -29,9 +29,11 @@
     th{background:var(--surface-2);font-weight:900;}
     td.date.sat{background:#e8f6ff;}
     td.date.sun{background:#ffecec;}
+    td.date.holiday{background:#ffecec;}
     .sum-row td{background:#55cad8;font-weight:900;border:2px solid var(--border);}
 
     .shift-btn{appearance:none;border:none;color:#fff;font-weight:900;border-radius:6px;padding:4px 2px;min-height:28px;width:100%;font-size:11px;}
+    .shift-btn:disabled{opacity:.55;filter:grayscale(.25);}
     .s-work{background:#1c9b2d;}
     .s-holiday{background:#f0ad00;color:#1d1d1d;}
     .s-absence{background:#d64545;}
@@ -123,6 +125,7 @@
   const OPS_KEY='ops';
   const SETTINGS_KEY='tsms_settings';
   const PLAN_KEY='tsms_sales_plan';
+  const HOLIDAY_KEY='tsms_holidays_jp_v1';
   const SHIFT_ORDER=['work','holiday','absence','part'];
   const SHIFT_LABEL={work:'出勤',holiday:'休日',absence:'欠勤',part:'バイト'};
   const SHIFT_CLASS={work:'s-work',holiday:'s-holiday',absence:'s-absence',part:'s-part'};
@@ -143,6 +146,30 @@
   function hm(totalMin){const m=Math.max(0,Math.round(Number(totalMin)||0));return `${Math.floor(m/60)}:${pad2(m%60)}`;}
   function dowJa(d){return ['日','月','火','水','木','金','土'][d.getDay()];}
   function minDiff(a,b){const x=new Date(a).getTime(), y=new Date(b).getTime(); if(isNaN(x)||isNaN(y)) return 0; return Math.max(0,Math.round((y-x)/60000));}
+  function todayYmd(){ const n=new Date(); return ymd(new Date(n.getFullYear(),n.getMonth(),n.getDate())); }
+
+  async function loadHolidaySet(){
+    try{
+      const cached = loadJson(HOLIDAY_KEY, null);
+      if(cached && typeof cached === 'object' && cached.map){
+        const age = Date.now() - Number(cached.fetchedAt||0);
+        if(age < 1000*60*60*24*7){
+          return new Set(Object.keys(cached.map));
+        }
+      }
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), 5000);
+      const res = await fetch('https://holidays-jp.github.io/api/v1/date.json', {signal: ctrl.signal});
+      clearTimeout(t);
+      if(!res.ok) throw new Error('holiday fetch failed');
+      const json = await res.json();
+      saveJson(HOLIDAY_KEY, {fetchedAt:Date.now(), map:json});
+      return new Set(Object.keys(json||{}));
+    }catch(_){
+      const fallback = loadJson(HOLIDAY_KEY, {map:{}});
+      return new Set(Object.keys((fallback&&fallback.map)||{}));
+    }
+  }
 
   function toDayId(r){
     if(r&&r.dayId) return String(r.dayId);
@@ -216,7 +243,7 @@
     return Array.from(set.values()).sort((a,b)=>b.start-a.start);
   }
 
-  function render(){
+  function render(holidaySet){
     const settings=getSettings();
     const reports=loadJson(REPORT_KEY,[]);
     const plan=getPlan();
@@ -230,6 +257,7 @@
     const period = periods.find(p=>periodId(p)===monthSelect.value) || periods[0];
     if(!period) return;
     const days=periodDays(period);
+    const todayId = todayYmd();
 
     tbody.innerHTML='';
     let sumTarget=0,sumResult=0,sumDiff=0,sumWork=0,sumBreak=0;
@@ -246,6 +274,7 @@
       const row=plan[dayId];
       const shift=row.shift;
       const active=(shift==='work' || shift==='part');
+      const pastLocked = dayId < todayId;
       const result=active?calcDayNet(dayId,reports,settings):0;
       const target=active?(Number(row.target)||0):0;
       const diff=result-target;
@@ -254,25 +283,26 @@
       const breakMin=opsData?opsData.breakMin:0;
       const hour=workMin>0?Math.round(result/(workMin/60)):0;
 
-      if(active){
+      if(active && !pastLocked){
         sumTarget+=target; sumResult+=result; sumDiff+=diff; sumWork+=workMin; sumBreak+=breakMin;
       }
 
       const tr=document.createElement('tr');
       const wk=d.getDay();
-      const wkCls=wk===6?'sat':(wk===0?'sun':'');
+      const isHoliday = holidaySet && holidaySet.has(dayId);
+      const wkCls=wk===6?'sat':((wk===0||isHoliday)?'sun holiday':'');
       tr.innerHTML=`
         <td>
-          <button type="button" class="shift-btn ${SHIFT_CLASS[shift]}" data-day="${dayId}">${SHIFT_LABEL[shift]}</button>
+          <button type="button" class="shift-btn ${SHIFT_CLASS[shift]}" data-day="${dayId}" ${pastLocked?'disabled':''}>${SHIFT_LABEL[shift]}</button>
         </td>
         <td class="date ${wkCls}">${d.getMonth()+1}/${d.getDate()}(${dowJa(d)})</td>
-        <td class="${active?'':'muted'}"><input class="target-input" data-target="${dayId}" value="${active?(row.target||''):''}" ${active?'':'disabled'} inputmode="numeric"></td>
-        <td class="${active?'':'muted'}">${active?fmtNum(result):'-'}</td>
-        <td class="${active?'':'muted'}">${active?(diff>=0?`+${fmtNum(diff)}`:`-${fmtNum(Math.abs(diff))}`):'-'}</td>
-        <td class="${active?'':'muted'}">${active?(opsData?opsData.depart:'--'):'-'}</td>
-        <td class="${active?'':'muted'}">${active?(opsData?hm(workMin):'--'):'-'}</td>
-        <td class="${active?'':'muted'}">${active?(opsData?hm(breakMin):'--'):'-'}</td>
-        <td class="${active?'':'muted'}">${active?(opsData?fmtNum(hour):'--'):'-'}</td>
+        <td class="${(active && !pastLocked)?'':'muted'}"><input class="target-input" data-target="${dayId}" value="${(active && !pastLocked)?(row.target||''):''}" ${(active && !pastLocked)?'':'disabled'} inputmode="numeric"></td>
+        <td class="${(active && !pastLocked)?'':'muted'}">${active?fmtNum(result):'-'}</td>
+        <td class="${(active && !pastLocked)?'':'muted'}">${active?(diff>=0?`+${fmtNum(diff)}`:`-${fmtNum(Math.abs(diff))}`):'-'}</td>
+        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?opsData.depart:'--'):'-'}</td>
+        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?hm(workMin):'--'):'-'}</td>
+        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?hm(breakMin):'--'):'-'}</td>
+        <td class="${(active && !pastLocked)?'':'muted'}">${active?(opsData?fmtNum(hour):'--'):'-'}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -287,7 +317,8 @@
     document.getElementById('sumHour').textContent=sumWork>0?fmtNum(Math.round(sumResult/(sumWork/60))):'0';
   }
 
-  monthSelect.addEventListener('change', render);
+  let holidaySet = new Set();
+  monthSelect.addEventListener('change', ()=>render(holidaySet));
 
   tbody.addEventListener('click',(e)=>{
     const btn=e.target.closest('.shift-btn');
@@ -298,7 +329,7 @@
     const i=SHIFT_ORDER.indexOf(plan[day].shift);
     plan[day].shift = SHIFT_ORDER[(i+1)%SHIFT_ORDER.length];
     savePlan(plan);
-    render();
+    render(holidaySet);
   });
 
   tbody.addEventListener('input',(e)=>{
@@ -309,10 +340,13 @@
     if(!plan[day]) plan[day]={shift:'work',target:''};
     plan[day].target = String(input.value||'').replace(/[^0-9]/g,'');
     savePlan(plan);
-    render();
+    render(holidaySet);
   });
 
-  render();
+  (async function init(){
+    holidaySet = await loadHolidaySet();
+    render(holidaySet);
+  })();
 })();
 </script>
 
