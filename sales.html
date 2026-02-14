@@ -242,7 +242,20 @@
     reports.forEach(r=>{ const d=parseYmd(toDayId(r)); if(!isNaN(d)) seed.push(d); });
     const ops=loadJson(OPS_KEY,{});
     if(ops && ops.dayId){ const d=parseYmd(ops.dayId); if(!isNaN(d)) seed.push(d); }
+
+    // data-derived periods
     seed.forEach(d=>{ const p=getPeriodForDate(d, Number(settings.closeStartDay)||16, Number(settings.closeEndDay)||15); set.set(periodId(p), p); });
+
+    // always include current + next 2 closing periods for planning
+    const today = new Date();
+    const base = getPeriodForDate(today, Number(settings.closeStartDay)||16, Number(settings.closeEndDay)||15);
+    set.set(periodId(base), base);
+    [1,2].forEach((m)=>{
+      const shifted = addMonths(base.start, m);
+      const future = getPeriodForDate(shifted, Number(settings.closeStartDay)||16, Number(settings.closeEndDay)||15);
+      set.set(periodId(future), future);
+    });
+
     return Array.from(set.values()).sort((a,b)=>b.start-a.start);
   }
 
