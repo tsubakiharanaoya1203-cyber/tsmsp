@@ -74,6 +74,7 @@
       text-decoration:none; color:#000;
       font-size:18px; font-weight:900;
     }
+    .tsms-menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
     .tsms-menu-bg{
       position:fixed; inset:0;
       background:rgba(0,0,0,.25);
@@ -93,13 +94,13 @@
 </head>
 <body>
 <nav class="tsms-menu" id="tsmsMenu" aria-label="サイドメニュー">
-  <a href="index.html">TOP</a>
-  <a href="report.html">日報入力</a>
-  <a href="confirm.html">入力確認</a>
-  <a href="detail.html">詳細確認</a>
-  <a href="ops.html">出庫/帰庫/休憩</a>
-  <a href="sales.html">売上</a>
-  <a href="settings.html">設定</a>
+  <a href="index.html">TOP<small>メニュー一覧</small></a>
+  <a href="report.html">日報入力<small>乗車データを入力</small></a>
+  <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
+  <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
+  <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="tsms-menu-bg" id="tsmsMenuBg" aria-hidden="true"></div>
 
@@ -122,7 +123,7 @@
   <section class="wf-panel" id="sec_payMethod">
     <div class="wf-label">支払方法</div>
     <div class="wf-row">
-      <button class="btn" type="button" data-group="payMethod" data-value="現金">現金</button><button class="btn" type="button" data-group="payMethod" data-value="QR">QR</button><button class="btn" type="button" data-group="payMethod" data-value="クレカ">クレカ</button><button class="btn" type="button" data-group="payMethod" data-value="電子M">電子M</button><button class="btn" type="button" data-group="payMethod" data-value="チケット他">チケット他</button><button class="btn" type="button" data-group="payMethod" data-value="会社">会社</button><button class="btn" type="button" data-group="payMethod" data-value="予約">予約</button><button class="btn" type="button" data-group="payMethod" data-value="GO">GO Pay</button><button class="btn" type="button" data-group="payMethod" data-value="乗込GO Pay">乗込GO Pay</button>
+      <button class="btn" type="button" data-group="payMethod" data-value="現金">現金</button><button class="btn" type="button" data-group="payMethod" data-value="QR">QR</button><button class="btn" type="button" data-group="payMethod" data-value="クレカ">クレカ</button><button class="btn" type="button" data-group="payMethod" data-value="電子M">電子M</button><button class="btn" type="button" data-group="payMethod" data-value="チケット他">チケット他</button><button class="btn" type="button" data-group="payMethod" data-value="GO pay">GO pay</button><button class="btn" type="button" data-group="payMethod" data-value="乗込GO Pay">乗込GO Pay</button>
     </div>
   </section>
 
@@ -180,6 +181,8 @@
 
 <script>
 (() => {
+  const REPORT_KEY = "tsms_reports";
+  const CURRENT_DAY_KEY = "tsms_report_current_day";
   const state = { rideType: "", payMethod: "", ticketSub: "" };
   const secTicket = document.getElementById("sec_ticketSub");
   const secAmounts = document.getElementById("sec_amounts");
@@ -191,6 +194,31 @@
   const btnClear = document.getElementById("btn_clear");
   const btnSubmit = document.getElementById("btn_submit");
   let focused = inCash;
+
+  function todayLocalYmd() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function loadReports() {
+    try {
+      const list = JSON.parse(localStorage.getItem(REPORT_KEY) || "[]");
+      return Array.isArray(list) ? list : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function getCurrentDayId() {
+    return localStorage.getItem(CURRENT_DAY_KEY) || "";
+  }
+
+  function resolveSaveDayId() {
+    return getCurrentDayId() || todayLocalYmd();
+  }
 
   function clearSelected(group) {
     document.querySelectorAll(`button[data-group="${group}"]`).forEach((b) => b.classList.remove("is-selected"));
@@ -321,14 +349,14 @@
       ticketSub: state.ticketSub || "",
       cash: cash ? Number(cash.replace(/[^0-9]/g, "")) : 0,
       credit: credit ? Number(credit.replace(/[^0-9]/g, "")) : 0,
-      note: (inNote.value || "").trim()
+      note: (inNote.value || "").trim(),
+      dayId: resolveSaveDayId()
     };
 
     const params = new URLSearchParams(location.search);
     const editId = params.get("edit");
 
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch (_) { list = []; }
+    let list = loadReports();
 
     if (editId) {
       const idx = list.findIndex((x) => x.id === editId);
@@ -342,7 +370,7 @@
       list.unshift(entry);
     }
 
-    localStorage.setItem("tsms_reports", JSON.stringify(list));
+    localStorage.setItem(REPORT_KEY, JSON.stringify(list));
     location.href = "confirm.html";
   });
 
@@ -354,8 +382,7 @@
       return;
     }
 
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem("tsms_reports") || "[]"); } catch (_) { list = []; }
+    let list = loadReports();
     const entry = list.find((x) => x.id === editId);
     if (!entry) {
       applyPayRules();
