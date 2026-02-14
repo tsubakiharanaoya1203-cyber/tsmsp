@@ -20,17 +20,49 @@
     .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
     .btn{appearance:none;-webkit-appearance:none;border:2px solid var(--border);background:#fff;border-radius:0;padding:12px 8px;font-size:16px;min-height:52px;font-weight:900;}
 
-    .tsms-header{position:sticky;top:0;z-index:100;height:60px;background:#fff;border-bottom:2px solid #000;display:flex;align-items:center;padding:0 14px 0 56px;font-weight:900;font-size:20px;}
-    .tsms-hamburger{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:32px;height:24px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;user-select:none;}
-    .tsms-hamburger span{height:3px;background:#000;display:block;}
-    .tsms-menu{position:fixed;top:0;left:0;height:100%;width:280px;background:#fff;border-right:2px solid #000;transform:translateX(-100%);transition:transform .25s ease;z-index:1000;padding-top:60px;}
-    .tsms-menu.open{transform:translateX(0);}
-    .tsms-menu a{display:block;padding:16px;border-bottom:1px solid #ddd;text-decoration:none;color:#000;font-size:18px;font-weight:900;}
-    .tsms-menu small{display:block;margin-top:2px;font-size:12px;font-weight:700;color:#666;}
-    .tsms-menu-bg{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:900;}
-    .tsms-menu-bg.show{opacity:1;pointer-events:auto;}
-    .tsms-build{font-size:12px;color:#666;padding:8px 12px;}
-  </style>
+/* ---- TSMS Hamburger Menu (overlay) ---- */
+.tsms-header{
+  position:sticky; top:0; z-index:100;
+  height:60px; background:#fff;
+  border-bottom:2px solid #000;
+  display:flex; align-items:center;
+  padding:0 14px 0 56px;
+  font-weight:900; font-size:20px;
+}
+.tsms-hamburger{
+  position:absolute; left:14px; top:50%;
+  transform:translateY(-50%);
+  width:32px; height:24px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  cursor:pointer; user-select:none;
+}
+.tsms-hamburger span{ height:3px; background:#000; display:block; }
+.tsms-menu{
+  position:fixed; top:0; left:0; height:100%; width:280px;
+  background:#fff; border-right:2px solid #000;
+  transform:translateX(-100%);
+  transition:transform .25s ease;
+  z-index:1000; padding-top:60px;
+}
+.tsms-menu.open{ transform:translateX(0); }
+.tsms-menu a{
+  display:block; padding:16px;
+  border-bottom:1px solid #ddd;
+  text-decoration:none; color:#000;
+  font-size:18px; font-weight:900;
+}
+.tsms-menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
+.tsms-menu-bg{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.25);
+  opacity:0; pointer-events:none;
+  transition:opacity .2s ease;
+  z-index:900;
+}
+.tsms-menu-bg.show{ opacity:1; pointer-events:auto; }
+.tsms-build{ font-size:12px; color:#666; padding:8px 12px; }
+/* -------------------------------------- */
+</style>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
