@@ -19,7 +19,7 @@ html,body{
   border-bottom:2px solid var(--border);
   display:flex; align-items:center;
   padding:0 14px 0 56px;
-  font-weight:900; font-size:20px;
+  font-weight:900; font-size:22px;
   background:var(--bg);
 }
 .hamburger{
@@ -47,7 +47,7 @@ html,body{
   padding:16px;
   border-bottom:1px solid #ddd;
   text-decoration:none; color:var(--text-primary);
-  font-size:18px; font-weight:900;
+  font-size:19px; font-weight:900;
 }
 .menu small{ display:block; margin-top:2px; font-size:12px; font-weight:700; color:#666; }
 
@@ -71,7 +71,7 @@ a.tile{
   border:2px solid var(--border);
   aspect-ratio:1/1;
   display:flex; align-items:center; justify-content:center;
-  font-weight:900; font-size:18px;
+  font-weight:900; font-size:22px;
   background:var(--bg);
   text-decoration:none; color:var(--text-primary);
   border-radius:0;
@@ -89,6 +89,8 @@ a.tile:active{ transform:translateY(1px); }
 
 @media (min-width:768px){
   .container{ max-width:560px; margin:0 auto; }
+  .header{font-size:24px;}
+  a.tile{font-size:24px;}
 }
 /* ---- Theme tokens ---- */
 :root{
@@ -145,8 +147,8 @@ a{ color:var(--link); }
   <a href="confirm.html">入力確認<small>当日・過去のデータを確認</small></a>
   <a href="detail.html">詳細確認<small>概算手取、集計結果など</small></a>
   <a href="ops.html">出庫 / 帰庫 / 休憩<small>休憩タイマーなど</small></a>
-  <a href="sales.html">月間管理<small>売上確認、目標、シフトなど</small></a>
-  <a href="settings.html">設定<small>歩率、締め期間など</small></a>
+  <a href="sales.html">月次売上<small>当月、過去の売上確認</small></a>
+  <a href="settings.html">設定<small>歩率、締め期間、シフトなど</small></a>
 </nav>
 <div class="menu-bg" id="menuBg" aria-hidden="true"></div>
 
