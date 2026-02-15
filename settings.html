@@ -244,7 +244,7 @@ a{ color:var(--link); }
       const cfg = (raw && typeof raw === "object") ? raw : {};
       return {
         url: String(cfg.url || "https://gsvehqeywmjqlvuzwvuo.supabase.co").trim(),
-        anonKey: String(cfg.anonKey || "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ").trim(),
+        anonKey: sanitizeHeaderToken(cfg.anonKey || "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ"),
         deviceId: String(cfg.deviceId || uid()).trim()
       };
     }catch(_){
@@ -258,23 +258,33 @@ a{ color:var(--link); }
       deviceId: String(cfg.deviceId || "").trim()
     }));
   }
+  function isLatin1(str){
+    return /^[\x00-\xFF]*$/.test(str);
+  }
+  function sanitizeHeaderToken(token){
+    const t = String(token || "").trim();
+    return t.replace(/[\r\n]/g, "");
+  }
   function fillSupabaseConfig(){
     const cfg = loadSupabaseConfig();
     const eUrl = document.getElementById("supabaseUrl");
     const eKey = document.getElementById("supabaseAnonKey");
     const eDevice = document.getElementById("supabaseDeviceId");
     if(eUrl) eUrl.value = cfg.url;
-    if(eKey) eKey.value = cfg.anonKey;
+    if(eKey) eKey.value = sanitizeHeaderToken(cfg.anonKey);
     if(eDevice) eDevice.value = cfg.deviceId;
   }
   function readSupabaseConfigFromForm(){
     const cfg = {
       url: (document.getElementById("supabaseUrl")?.value || "").trim().replace(/\/$/, ""),
-      anonKey: (document.getElementById("supabaseAnonKey")?.value || "").trim(),
+      anonKey: sanitizeHeaderToken(document.getElementById("supabaseAnonKey")?.value || ""),
       deviceId: (document.getElementById("supabaseDeviceId")?.value || "").trim() || uid()
     };
     if(!cfg.url || !cfg.anonKey || !cfg.deviceId){
       throw new Error("Supabase URL / Anon Key / 端末ID を入力してください");
+    }
+    if(!isLatin1(cfg.anonKey)){
+      throw new Error("Anon Key に非ASCII/非Latin-1文字が含まれています。設定を貼り直してください。");
     }
     return cfg;
   }
