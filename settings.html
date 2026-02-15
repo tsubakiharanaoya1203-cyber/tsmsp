@@ -174,9 +174,8 @@ a{ color:var(--link); }
     <div class="field"><div class="label">GO手配料（円/件）</div><input class="input" id="goFeeYen" inputmode="numeric"></div>
     <div class="field"><div class="label">歩率（%）</div><input class="input" id="walkRate" inputmode="decimal"></div>
 
-    <div class="actions">
+    <div class="actions" style="grid-template-columns:1fr;">
       <button class="btn" id="btnSaveCalc" type="button">保存して詳細確認へ</button>
-      <a class="btn" href="detail.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">詳細確認へ</a>
     </div>
   </section>
 
@@ -306,9 +305,12 @@ a{ color:var(--link); }
   if(els.themeMode){
     els.themeMode.addEventListener("change", ()=> applyTheme(els.themeMode.value));
   }
-  document.getElementById("btnSaveCalc").addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("計算設定を保存しました"); location.href="detail.html"; });
-  document.getElementById("btnSaveShift").addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("締め期間・シフト設定を保存しました"); location.href="sales.html"; });
-  document.getElementById("btnReset").addEventListener("click", ()=>{ if(!confirm("初期値に戻しますか？")) return; fill(defaults); save(defaults); applyTheme("light"); if(els.themeMode) els.themeMode.value = "light"; });
+  const btnSaveCalc = document.getElementById("btnSaveCalc");
+  const btnSaveShift = document.getElementById("btnSaveShift");
+  const btnReset = document.getElementById("btnReset");
+  if(btnSaveCalc) btnSaveCalc.addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("計算設定を保存しました"); location.href="detail.html"; });
+  if(btnSaveShift) btnSaveShift.addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("締め期間・シフト設定を保存しました"); location.href="sales.html"; });
+  if(btnReset) btnReset.addEventListener("click", ()=>{ if(!confirm("初期値に戻しますか？")) return; fill(defaults); save(defaults); applyTheme("light"); if(els.themeMode) els.themeMode.value = "light"; });
 
   const btnExport = document.getElementById("btnExportBackup");
   const btnImport = document.getElementById("btnImportBackup");
