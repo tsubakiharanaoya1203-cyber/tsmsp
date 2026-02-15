@@ -79,8 +79,9 @@
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) return setMsg("エラー: " + error.message);
 
-      setMsg("ログイン成功。indexへ戻ります…");
-      location.href = "./index.html";
+      const next = new URL(location.href).searchParams.get("next") || "./index.html";
+      setMsg("ログイン成功。遷移します…");
+      location.href = next;
     });
 
     $("btnLogout").addEventListener("click", async () => {
