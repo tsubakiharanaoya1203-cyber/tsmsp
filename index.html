@@ -229,7 +229,6 @@ a{ color:var(--link); }
   <button onclick="signOut()">ログアウト</button>
 </div>
 
-
 <script>
 const menu = document.getElementById("menu");
 const bg = document.getElementById("menuBg");
@@ -334,38 +333,6 @@ menu.querySelectorAll("a").forEach(a=>a.addEventListener("click", closeMenu));
 })();
 </script>
 
-<script>
-  const SUPABASE_URL = "https://gsvehqeywmjqlvuzwvuo.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ";
-
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  async function signUpWithEmailPassword(email, password) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return alert("サインアップ失敗: " + error.message);
-    alert("サインアップOK（ログインできるはず）");
-    console.log(data);
-  }
-
-  async function signInWithEmailPassword(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return alert("ログイン失敗: " + error.message);
-    alert("ログインOK");
-    console.log(data);
-  }
-
-  async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) return alert("ログアウト失敗: " + error.message);
-    alert("ログアウトOK");
-  }
-
-  async function showSession() {
-    const { data } = await supabase.auth.getSession();
-    console.log("session:", data.session);
-    alert(data.session ? ("ログイン中: " + data.session.user.email) : "未ログイン");
-  }
-</script>
 
 </body>
 </html>
