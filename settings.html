@@ -288,10 +288,17 @@ a{ color:var(--link); }
     a.click();
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }
-
-  function restoreBackupObject(payload){
-    if(!payload || payload.schema !== "tsms-backup-v1" || !payload.data || typeof payload.data !== "object"){
-      throw new Error("バックアップ形式が不正です");
+  function loadSupabaseConfig(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(SUPABASE_KEY) || "null");
+      const cfg = (raw && typeof raw === "object") ? raw : {};
+      return {
+        url: String(cfg.url || "https://gsvehqeywmjqlvuzwvuo.supabase.co").trim(),
+        anonKey: sanitizeHeaderToken(cfg.anonKey || "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ"),
+        deviceId: String(cfg.deviceId || uid()).trim()
+      };
+    }catch(_){
+      return { url:"https://gsvehqeywmjqlvuzwvuo.supabase.co", anonKey:"sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ", deviceId:uid() };
     }
     BACKUP_KEYS.forEach((k)=>{
       if(Object.prototype.hasOwnProperty.call(payload.data, k)){
@@ -361,6 +368,10 @@ a{ color:var(--link); }
         fileInput.value = "";
       }
     });
+    if(!res.ok){
+      const msg = await res.text();
+      throw new Error(`アップロード失敗: ${res.status} ${msg}`);
+    }
   }
 
 })();
