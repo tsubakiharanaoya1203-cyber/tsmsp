@@ -55,7 +55,7 @@
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
     const SUPABASE_URL = "https://gsvehqeywmjqlvuzwvuo.supabase.co";
-    const SUPABASE_ANON_KEY = "ここにPublishable Keyを貼る";
+    const SUPABASE_ANON_KEY = "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -73,7 +73,7 @@
         email,
         password,
         options: {
-          emailRedirectTo: location.origin + "/auth-callback.html"
+          emailRedirectTo: new URL("auth-callback.html", location.href).toString()
         }
       });
 

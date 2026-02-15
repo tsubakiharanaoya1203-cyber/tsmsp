@@ -42,8 +42,8 @@
   function setStatus(text){ statusEl.textContent = text; }
 
   const CONFIG_KEY = "tsms_supabase_config";
-  const FALLBACK_URL = "<YOUR_SUPABASE_URL>";
-  const FALLBACK_ANON_KEY = "<YOUR_ANON_KEY>";
+  const FALLBACK_URL = "https://gsvehqeywmjqlvuzwvuo.supabase.co";
+  const FALLBACK_ANON_KEY = "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ";
 
   function readConfig(){
     try{
@@ -62,7 +62,7 @@
     setStatus("Supabase SDKの読み込みに失敗しました。");
     return;
   }
-  if(!cfg.url || cfg.url.includes("<YOUR_SUPABASE_URL>") || !cfg.anonKey || cfg.anonKey.includes("<YOUR_ANON_KEY>")){
+  if(!cfg.url || !cfg.anonKey){
     setStatus("Supabase設定が未完了です。settings.html で URL / Anon Key を設定してください。");
     return;
   }

@@ -201,8 +201,9 @@ a{ color:var(--link); }
   <section class="section">
     <div class="title">Supabase連携</div>
     <div class="note">SupabaseのREST API経由でクラウドへバックアップ保存 / 復元を行います。事前に`tsms_backups`テーブル（device_id: text 主キー, payload: jsonb, updated_at: timestamptz）を作成してください。</div>
-    <div class="field"><div class="label">Supabase URL</div><input class="input" id="supabaseUrl" placeholder="https://xxxx.supabase.co"></div>
-    <div class="field"><div class="label">Supabase Anon Key</div><input class="input" id="supabaseAnonKey" placeholder="eyJ..."></div>
+    <div class="note">※ まだ `tsms_backups` テーブル未作成の場合は Supabase SQL Editor で次を実行してください：<br><code>create table if not exists public.tsms_backups (device_id text primary key, payload jsonb not null, updated_at timestamptz not null default now());</code></div>
+    <div class="field"><div class="label">Supabase URL</div><input class="input" id="supabaseUrl" placeholder="https://gsvehqeywmjqlvuzwvuo.supabase.co"></div>
+    <div class="field"><div class="label">Supabase Anon Key</div><input class="input" id="supabaseAnonKey" placeholder="sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ"></div>
     <div class="field"><div class="label">端末ID（任意変更可）</div><input class="input" id="supabaseDeviceId" placeholder="tsms-device-01"></div>
     <div class="actions">
       <button class="btn" id="btnSupabaseSaveConfig" type="button">連携設定を保存</button>
@@ -242,12 +243,12 @@ a{ color:var(--link); }
       const raw = JSON.parse(localStorage.getItem(SUPABASE_KEY) || "null");
       const cfg = (raw && typeof raw === "object") ? raw : {};
       return {
-        url: String(cfg.url || "").trim(),
-        anonKey: String(cfg.anonKey || "").trim(),
+        url: String(cfg.url || "https://gsvehqeywmjqlvuzwvuo.supabase.co").trim(),
+        anonKey: String(cfg.anonKey || "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ").trim(),
         deviceId: String(cfg.deviceId || uid()).trim()
       };
     }catch(_){
-      return { url:"", anonKey:"", deviceId:uid() };
+      return { url:"https://gsvehqeywmjqlvuzwvuo.supabase.co", anonKey:"sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ", deviceId:uid() };
     }
   }
   function saveSupabaseConfig(cfg){
