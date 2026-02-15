@@ -205,6 +205,7 @@ a{ color:var(--link); }
 <script>
 (function(){
   const KEY = "tsms_settings";
+  const SUPABASE_KEY = "tsms_supabase_config";
   const defaults = { taxRate:10, feeRate:4, goFeeYen:100, walkRate:50, closeStartDay:1, closeEndDay:31, shiftNote:"" };
 
   function load(){
@@ -219,74 +220,31 @@ a{ color:var(--link); }
   const BACKUP_KEYS = ["tsms_reports","ops","tsms_settings","tsms_sales_plan","tsms_report_current_day","tsms_holidays_jp_v1","tsms_theme"];
   const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
 
-  function applyTheme(mode){
-    const m = (mode === "dark") ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", m);
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
-    if(themeMeta) themeMeta.setAttribute("content", m === "dark" ? "#0F1417" : "#F3F6F8");
-    localStorage.setItem("tsms_theme", m);
+  function uid(){
+    return `tsms-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
   }
-
-  function fill(v){
-    const mode = localStorage.getItem("tsms_theme") || "light";
-    if(els.themeMode) els.themeMode.value = mode;
-    ids.filter(id=>id!=="themeMode").forEach(id => { if(els[id]) els[id].value = String(v[id] ?? ""); });
-  }
-  function values(){
-    const getNum = (id, fallback) => {
-      const n = Number((els[id].value || "").trim());
-      return Number.isFinite(n) ? n : fallback;
-    };
-    return {
-      taxRate: getNum("taxRate", defaults.taxRate),
-      feeRate: getNum("feeRate", defaults.feeRate),
-      goFeeYen: getNum("goFeeYen", defaults.goFeeYen),
-      walkRate: getNum("walkRate", defaults.walkRate),
-      closeStartDay: getNum("closeStartDay", defaults.closeStartDay),
-      closeEndDay: getNum("closeEndDay", defaults.closeEndDay),
-      shiftNote: (els.shiftNote.value || "").trim()
-    };
-  }
-
-  function buildBackupPayload(){
-    const data = {};
-    BACKUP_KEYS.forEach((k)=>{
-      const raw = localStorage.getItem(k);
-      if(raw !== null) data[k] = raw;
-    });
-    return {
-      schema: "tsms-backup-v1",
-      exportedAt: new Date().toISOString(),
-      data
-    };
-  }
-
-  function exportBackup(){
-    const payload = buildBackupPayload();
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const a = document.createElement("a");
-    const now = new Date();
-    const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}-${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}`;
-    a.href = URL.createObjectURL(blob);
-    a.download = `tsms-backup-${stamp}.json`;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-  }
-
-  function restoreBackupObject(payload){
-    if(!payload || payload.schema !== "tsms-backup-v1" || !payload.data || typeof payload.data !== "object"){
-      throw new Error("バックアップ形式が不正です");
+  function loadSupabaseConfig(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(SUPABASE_KEY) || "null");
+      const cfg = (raw && typeof raw === "object") ? raw : {};
+      return {
+        url: String(cfg.url || "https://gsvehqeywmjqlvuzwvuo.supabase.co").trim(),
+        anonKey: sanitizeHeaderToken(cfg.anonKey || "sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ"),
+        deviceId: String(cfg.deviceId || uid()).trim()
+      };
+    }catch(_){
+      return { url:"https://gsvehqeywmjqlvuzwvuo.supabase.co", anonKey:"sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ", deviceId:uid() };
     }
-    BACKUP_KEYS.forEach((k)=>{
-      if(Object.prototype.hasOwnProperty.call(payload.data, k)){
-        localStorage.setItem(k, String(payload.data[k]));
-      }
-    });
-    fill(load());
-    const mode = localStorage.getItem("tsms_theme") || "light";
-    applyTheme(mode);
-    if(els.themeMode) els.themeMode.value = mode;
+  }
+  function saveSupabaseConfig(cfg){
+    localStorage.setItem(SUPABASE_KEY, JSON.stringify({
+      url: String(cfg.url || "").trim(),
+      anonKey: String(cfg.anonKey || "").trim(),
+      deviceId: String(cfg.deviceId || "").trim()
+    }));
+  }
+  function isLatin1(str){
+    return /^[\x00-\xFF]*$/.test(str);
   }
 
   fill(load());
@@ -317,6 +275,10 @@ a{ color:var(--link); }
         fileInput.value = "";
       }
     });
+    if(!res.ok){
+      const msg = await res.text();
+      throw new Error(`アップロード失敗: ${res.status} ${msg}`);
+    }
   }
 
 })();
