@@ -198,11 +198,28 @@ a{ color:var(--link); }
     <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
   </section>
 
+  <section class="section">
+    <div class="title">Supabase連携</div>
+    <div class="note">SupabaseのREST API経由でクラウドへバックアップ保存 / 復元を行います。事前に`tsms_backups`テーブル（device_id: text 主キー, payload: jsonb, updated_at: timestamptz）を作成してください。</div>
+    <div class="field"><div class="label">Supabase URL</div><input class="input" id="supabaseUrl" placeholder="https://xxxx.supabase.co"></div>
+    <div class="field"><div class="label">Supabase Anon Key</div><input class="input" id="supabaseAnonKey" placeholder="eyJ..."></div>
+    <div class="field"><div class="label">端末ID（任意変更可）</div><input class="input" id="supabaseDeviceId" placeholder="tsms-device-01"></div>
+    <div class="actions">
+      <button class="btn" id="btnSupabaseSaveConfig" type="button">連携設定を保存</button>
+      <button class="btn" id="btnSupabaseUpload" type="button">クラウドへ保存</button>
+    </div>
+    <div class="actions" style="margin-top:8px;">
+      <button class="btn" id="btnSupabaseDownload" type="button">クラウドから復元</button>
+      <button class="btn" id="btnSupabaseClearConfig" type="button">連携設定を消去</button>
+    </div>
+  </section>
+
 </main>
 
 <script>
 (function(){
   const KEY = "tsms_settings";
+  const SUPABASE_KEY = "tsms_supabase_config";
   const defaults = { taxRate:10, feeRate:4, goFeeYen:100, walkRate:50, closeStartDay:1, closeEndDay:31, shiftNote:"" };
 
   function load(){
@@ -216,6 +233,94 @@ a{ color:var(--link); }
   const ids = ["themeMode","taxRate","feeRate","goFeeYen","walkRate","closeStartDay","closeEndDay","shiftNote"];
   const BACKUP_KEYS = ["tsms_reports","ops","tsms_settings","tsms_sales_plan","tsms_report_current_day","tsms_holidays_jp_v1","tsms_theme"];
   const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+
+  function uid(){
+    return `tsms-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
+  }
+  function loadSupabaseConfig(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(SUPABASE_KEY) || "null");
+      const cfg = (raw && typeof raw === "object") ? raw : {};
+      return {
+        url: String(cfg.url || "").trim(),
+        anonKey: String(cfg.anonKey || "").trim(),
+        deviceId: String(cfg.deviceId || uid()).trim()
+      };
+    }catch(_){
+      return { url:"", anonKey:"", deviceId:uid() };
+    }
+  }
+  function saveSupabaseConfig(cfg){
+    localStorage.setItem(SUPABASE_KEY, JSON.stringify({
+      url: String(cfg.url || "").trim(),
+      anonKey: String(cfg.anonKey || "").trim(),
+      deviceId: String(cfg.deviceId || "").trim()
+    }));
+  }
+  function fillSupabaseConfig(){
+    const cfg = loadSupabaseConfig();
+    const eUrl = document.getElementById("supabaseUrl");
+    const eKey = document.getElementById("supabaseAnonKey");
+    const eDevice = document.getElementById("supabaseDeviceId");
+    if(eUrl) eUrl.value = cfg.url;
+    if(eKey) eKey.value = cfg.anonKey;
+    if(eDevice) eDevice.value = cfg.deviceId;
+  }
+  function readSupabaseConfigFromForm(){
+    const cfg = {
+      url: (document.getElementById("supabaseUrl")?.value || "").trim().replace(/\/$/, ""),
+      anonKey: (document.getElementById("supabaseAnonKey")?.value || "").trim(),
+      deviceId: (document.getElementById("supabaseDeviceId")?.value || "").trim() || uid()
+    };
+    if(!cfg.url || !cfg.anonKey || !cfg.deviceId){
+      throw new Error("Supabase URL / Anon Key / 端末ID を入力してください");
+    }
+    return cfg;
+  }
+  async function supabaseUpload(payload){
+    const cfg = readSupabaseConfigFromForm();
+    saveSupabaseConfig(cfg);
+    const endpoint = `${cfg.url}/rest/v1/tsms_backups?on_conflict=device_id`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "apikey": cfg.anonKey,
+        "Authorization": `Bearer ${cfg.anonKey}`,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates,return=representation"
+      },
+      body: JSON.stringify([{ device_id: cfg.deviceId, payload, updated_at: new Date().toISOString() }])
+    });
+    if(!res.ok){
+      const msg = await res.text();
+      throw new Error(`アップロード失敗: ${res.status} ${msg}`);
+    }
+  }
+  async function supabaseDownload(){
+    const cfg = readSupabaseConfigFromForm();
+    saveSupabaseConfig(cfg);
+    const q = new URLSearchParams({
+      select: "payload,updated_at",
+      device_id: `eq.${cfg.deviceId}`,
+      order: "updated_at.desc",
+      limit: "1"
+    });
+    const endpoint = `${cfg.url}/rest/v1/tsms_backups?${q.toString()}`;
+    const res = await fetch(endpoint, {
+      headers: {
+        "apikey": cfg.anonKey,
+        "Authorization": `Bearer ${cfg.anonKey}`
+      }
+    });
+    if(!res.ok){
+      const msg = await res.text();
+      throw new Error(`ダウンロード失敗: ${res.status} ${msg}`);
+    }
+    const rows = await res.json();
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if(!row || !row.payload) throw new Error("クラウド上にバックアップが見つかりません");
+    return row;
+  }
 
   function applyTheme(mode){
     const m = (mode === "dark") ? "dark" : "light";
@@ -314,6 +419,54 @@ a{ color:var(--link); }
       }finally{
         fileInput.value = "";
       }
+    });
+  }
+
+  fillSupabaseConfig();
+  const btnSupabaseSaveConfig = document.getElementById("btnSupabaseSaveConfig");
+  const btnSupabaseUpload = document.getElementById("btnSupabaseUpload");
+  const btnSupabaseDownload = document.getElementById("btnSupabaseDownload");
+  const btnSupabaseClearConfig = document.getElementById("btnSupabaseClearConfig");
+  if(btnSupabaseSaveConfig){
+    btnSupabaseSaveConfig.addEventListener("click", ()=>{
+      try{
+        const cfg = readSupabaseConfigFromForm();
+        saveSupabaseConfig(cfg);
+        document.getElementById("supabaseDeviceId").value = cfg.deviceId;
+        alert("Supabase連携設定を保存しました");
+      }catch(err){
+        alert((err && err.message) ? err.message : "連携設定の保存に失敗しました");
+      }
+    });
+  }
+  if(btnSupabaseUpload){
+    btnSupabaseUpload.addEventListener("click", async ()=>{
+      try{
+        await supabaseUpload(buildBackupPayload());
+        alert("クラウドへバックアップを保存しました");
+      }catch(err){
+        alert((err && err.message) ? err.message : "クラウド保存に失敗しました");
+      }
+    });
+  }
+  if(btnSupabaseDownload){
+    btnSupabaseDownload.addEventListener("click", async ()=>{
+      if(!confirm("クラウドのバックアップで現在の保存データを上書きします。よろしいですか？")) return;
+      try{
+        const row = await supabaseDownload();
+        restoreBackupObject(row.payload);
+        alert(`クラウドから復元しました（更新日時: ${row.updated_at || "不明"}）`);
+      }catch(err){
+        alert((err && err.message) ? err.message : "クラウド復元に失敗しました");
+      }
+    });
+  }
+  if(btnSupabaseClearConfig){
+    btnSupabaseClearConfig.addEventListener("click", ()=>{
+      if(!confirm("Supabase連携設定を消去しますか？")) return;
+      localStorage.removeItem(SUPABASE_KEY);
+      fillSupabaseConfig();
+      alert("Supabase連携設定を消去しました");
     });
   }
 })();
