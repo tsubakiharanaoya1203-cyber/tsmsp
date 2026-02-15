@@ -238,7 +238,8 @@ a{ color:var(--link); }
   }
   function values(){
     const getNum = (id, fallback) => {
-      const n = Number((els[id].value || "").trim());
+      const el = els[id];
+      const n = Number((((el && el.value) || "") + "").trim());
       return Number.isFinite(n) ? n : fallback;
     };
     const clamp = (v,min,max) => Math.min(max, Math.max(min, v));
@@ -249,8 +250,17 @@ a{ color:var(--link); }
       walkRate: clamp(getNum("walkRate", defaults.walkRate), 0, 100),
       closeStartDay: clamp(Math.round(getNum("closeStartDay", defaults.closeStartDay)), 1, 31),
       closeEndDay: clamp(Math.round(getNum("closeEndDay", defaults.closeEndDay)), 1, 31),
-      shiftNote: (els.shiftNote.value || "").trim()
+      shiftNote: ((((els.shiftNote && els.shiftNote.value) || "") + "").trim())
     };
+  }
+
+  function persistCurrentSettings(){
+    const v = values();
+    save(v);
+    fill(v);
+    const mode = (els.themeMode && els.themeMode.value) ? els.themeMode.value : (localStorage.getItem("tsms_theme") || "light");
+    applyTheme(mode);
+    return v;
   }
 
   function buildBackupPayload(){
@@ -301,16 +311,41 @@ a{ color:var(--link); }
     if(els.themeMode) els.themeMode.value = mode;
   }
 
-  fill(load());
+  const current = load();
+  fill(current);
+  applyTheme(localStorage.getItem("tsms_theme") || "light");
   if(els.themeMode){
-    els.themeMode.addEventListener("change", ()=> applyTheme(els.themeMode.value));
+    els.themeMode.addEventListener("change", ()=>{
+      applyTheme(els.themeMode.value);
+      save(values());
+    });
   }
   const btnSaveCalc = document.getElementById("btnSaveCalc");
   const btnSaveShift = document.getElementById("btnSaveShift");
   const btnReset = document.getElementById("btnReset");
-  if(btnSaveCalc) btnSaveCalc.addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("計算設定を保存しました"); location.href="detail.html"; });
-  if(btnSaveShift) btnSaveShift.addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("締め期間・シフト設定を保存しました"); location.href="sales.html"; });
-  if(btnReset) btnReset.addEventListener("click", ()=>{ if(!confirm("初期値に戻しますか？")) return; fill(defaults); save(defaults); applyTheme("light"); if(els.themeMode) els.themeMode.value = "light"; });
+  if(btnSaveCalc) btnSaveCalc.addEventListener("click", ()=>{
+    try{
+      persistCurrentSettings();
+      location.href = "detail.html";
+    }catch(e){
+      alert("保存に失敗しました。入力内容をご確認ください。");
+    }
+  });
+  if(btnSaveShift) btnSaveShift.addEventListener("click", ()=>{
+    try{
+      persistCurrentSettings();
+      location.href = "sales.html";
+    }catch(e){
+      alert("保存に失敗しました。入力内容をご確認ください。");
+    }
+  });
+  if(btnReset) btnReset.addEventListener("click", ()=>{
+    if(!confirm("初期値に戻しますか？")) return;
+    fill(defaults);
+    save(defaults);
+    applyTheme("light");
+    if(els.themeMode) els.themeMode.value = "light";
+  });
 
   const btnExport = document.getElementById("btnExportBackup");
   const btnImport = document.getElementById("btnImportBackup");
