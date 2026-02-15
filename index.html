@@ -219,15 +219,6 @@ a{ color:var(--link); }
   </section>
 </main>
 
-<div style="padding:16px; border:1px solid #555; border-radius:12px; margin:12px;">
-  <h3>ログインテスト</h3>
-  <input id="email" placeholder="email" style="display:block; width:100%; margin:8px 0; padding:8px;">
-  <input id="pass" placeholder="password" type="password" style="display:block; width:100%; margin:8px 0; padding:8px;">
-  <button onclick="signUpWithEmailPassword(email.value, pass.value)">新規登録</button>
-  <button onclick="signInWithEmailPassword(email.value, pass.value)">ログイン</button>
-  <button onclick="showSession()">状態確認</button>
-  <button onclick="signOut()">ログアウト</button>
-</div>
 
 <script>
 const menu = document.getElementById("menu");

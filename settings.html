@@ -173,6 +173,11 @@ a{ color:var(--link); }
     <div class="field"><div class="label">決済手数料率（%）</div><input class="input" id="feeRate" inputmode="decimal"></div>
     <div class="field"><div class="label">GO手配料（円/件）</div><input class="input" id="goFeeYen" inputmode="numeric"></div>
     <div class="field"><div class="label">歩率（%）</div><input class="input" id="walkRate" inputmode="decimal"></div>
+
+    <div class="actions">
+      <button class="btn" id="btnSaveCalc" type="button">保存して詳細確認へ</button>
+      <a class="btn" href="detail.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">詳細確認へ</a>
+    </div>
   </section>
 
   <section class="section">
@@ -184,7 +189,7 @@ a{ color:var(--link); }
     <div class="field"><div class="label">シフトメモ</div><input class="input" id="shiftNote"></div>
 
     <div class="actions">
-      <button class="btn" id="btnSave" type="button">保存</button>
+      <button class="btn" id="btnSaveShift" type="button">保存して月間管理へ</button>
       <button class="btn" id="btnReset" type="button">初期値に戻す</button>
     </div>
   </section>
@@ -205,8 +210,7 @@ a{ color:var(--link); }
 <script>
 (function(){
   const KEY = "tsms_settings";
-  const SUPABASE_KEY = "tsms_supabase_config";
-  const defaults = { taxRate:10, feeRate:4, goFeeYen:100, walkRate:50, closeStartDay:1, closeEndDay:31, shiftNote:"" };
+  const defaults = { taxRate:10, feeRate:4, goFeeYen:100, walkRate:50, closeStartDay:16, closeEndDay:15, shiftNote:"" };
 
   function load(){
     try{
@@ -220,8 +224,60 @@ a{ color:var(--link); }
   const BACKUP_KEYS = ["tsms_reports","ops","tsms_settings","tsms_sales_plan","tsms_report_current_day","tsms_holidays_jp_v1","tsms_theme"];
   const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
 
-  function uid(){
-    return `tsms-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
+  function applyTheme(mode){
+    const m = (mode === "dark") ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", m);
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if(themeMeta) themeMeta.setAttribute("content", m === "dark" ? "#0F1417" : "#F3F6F8");
+    localStorage.setItem("tsms_theme", m);
+  }
+
+  function fill(v){
+    const mode = localStorage.getItem("tsms_theme") || "light";
+    if(els.themeMode) els.themeMode.value = mode;
+    ids.filter(id=>id!=="themeMode").forEach(id => { if(els[id]) els[id].value = String(v[id] ?? ""); });
+  }
+  function values(){
+    const getNum = (id, fallback) => {
+      const n = Number((els[id].value || "").trim());
+      return Number.isFinite(n) ? n : fallback;
+    };
+    const clamp = (v,min,max) => Math.min(max, Math.max(min, v));
+    return {
+      taxRate: clamp(getNum("taxRate", defaults.taxRate), 0, 100),
+      feeRate: clamp(getNum("feeRate", defaults.feeRate), 0, 100),
+      goFeeYen: Math.max(0, Math.round(getNum("goFeeYen", defaults.goFeeYen))),
+      walkRate: clamp(getNum("walkRate", defaults.walkRate), 0, 100),
+      closeStartDay: clamp(Math.round(getNum("closeStartDay", defaults.closeStartDay)), 1, 31),
+      closeEndDay: clamp(Math.round(getNum("closeEndDay", defaults.closeEndDay)), 1, 31),
+      shiftNote: (els.shiftNote.value || "").trim()
+    };
+  }
+
+  function buildBackupPayload(){
+    const data = {};
+    BACKUP_KEYS.forEach((k)=>{
+      const raw = localStorage.getItem(k);
+      if(raw !== null) data[k] = raw;
+    });
+    return {
+      schema: "tsms-backup-v1",
+      exportedAt: new Date().toISOString(),
+      data
+    };
+  }
+
+  function exportBackup(){
+    const payload = buildBackupPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    const now = new Date();
+    const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}-${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}`;
+    a.href = URL.createObjectURL(blob);
+    a.download = `tsms-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }
   function loadSupabaseConfig(){
     try{
@@ -235,23 +291,23 @@ a{ color:var(--link); }
     }catch(_){
       return { url:"https://gsvehqeywmjqlvuzwvuo.supabase.co", anonKey:"sb_publishable_PCpsmoo77V5L0YQfT2yKnA_QCEFpARJ", deviceId:uid() };
     }
-  }
-  function saveSupabaseConfig(cfg){
-    localStorage.setItem(SUPABASE_KEY, JSON.stringify({
-      url: String(cfg.url || "").trim(),
-      anonKey: String(cfg.anonKey || "").trim(),
-      deviceId: String(cfg.deviceId || "").trim()
-    }));
-  }
-  function isLatin1(str){
-    return /^[\x00-\xFF]*$/.test(str);
+    BACKUP_KEYS.forEach((k)=>{
+      if(Object.prototype.hasOwnProperty.call(payload.data, k)){
+        localStorage.setItem(k, String(payload.data[k]));
+      }
+    });
+    fill(load());
+    const mode = localStorage.getItem("tsms_theme") || "light";
+    applyTheme(mode);
+    if(els.themeMode) els.themeMode.value = mode;
   }
 
   fill(load());
   if(els.themeMode){
     els.themeMode.addEventListener("change", ()=> applyTheme(els.themeMode.value));
   }
-  document.getElementById("btnSave").addEventListener("click", ()=>{ save(values()); applyTheme(els.themeMode.value); alert("設定を保存しました"); });
+  document.getElementById("btnSaveCalc").addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("計算設定を保存しました"); location.href="detail.html"; });
+  document.getElementById("btnSaveShift").addEventListener("click", ()=>{ const v=values(); save(v); fill(v); applyTheme(els.themeMode.value); alert("締め期間・シフト設定を保存しました"); location.href="sales.html"; });
   document.getElementById("btnReset").addEventListener("click", ()=>{ if(!confirm("初期値に戻しますか？")) return; fill(defaults); save(defaults); applyTheme("light"); if(els.themeMode) els.themeMode.value = "light"; });
 
   const btnExport = document.getElementById("btnExportBackup");
