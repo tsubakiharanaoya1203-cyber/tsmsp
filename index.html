@@ -135,6 +135,7 @@ a{ color:var(--link); }
   <meta name="apple-mobile-web-app-title" content="TSMS">
 
   <script>(function(){try{var t=localStorage.getItem("tsms_theme")==="dark"?"dark":"light";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#0F1417":"#F3F6F8");}catch(e){}})();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style id="tsms-bottom-nav-style">
   body{padding-bottom:78px;}
@@ -211,12 +212,21 @@ a{ color:var(--link); }
         </li>
       </ul>
 
-      <p class="contact">アプリについての要望や質問があれば、<strong>taxi-sms@sm-s.com</strong>にご連絡下さい。</p>
+      <p class="contact">アプリについての要望や質問があれば、<strong>taxi-sms.@sm-s.com</strong>にご連絡下さい。</p>
       <div class="sign">2026/2/15　B.O.A.T. Tsubakihara</div>
     </div>
   </section>
 </main>
 
+<div style="padding:16px; border:1px solid #555; border-radius:12px; margin:12px;">
+  <h3>ログインテスト</h3>
+  <input id="email" placeholder="email" style="display:block; width:100%; margin:8px 0; padding:8px;">
+  <input id="pass" placeholder="password" type="password" style="display:block; width:100%; margin:8px 0; padding:8px;">
+  <button onclick="signUpWithEmailPassword(email.value, pass.value)">新規登録</button>
+  <button onclick="signInWithEmailPassword(email.value, pass.value)">ログイン</button>
+  <button onclick="showSession()">状態確認</button>
+  <button onclick="signOut()">ログアウト</button>
+</div>
 
 
 <script>
@@ -258,9 +268,18 @@ menu.querySelectorAll("a").forEach(a=>a.addEventListener("click", closeMenu));
 
 
   <script>
-    (function(){if('serviceWorker'in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();      <p class="contact">アプリについての要望や質問があれば、<strong>taxi-sms.@sm-s.com</strong>にご連絡下さい。</p>
->>>>>>>+codex/edit-ops.
-eBg"></div>
+    (function(){if('serviceWorker'in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();
+  </script>
+
+
+<nav class="tsms-bottom-nav" aria-label="ボトムメニュー">
+  <a href="report.html" data-tab="report"><span class="ico">📝</span><span>日報入力</span></a>
+  <a href="confirm.html" data-tab="confirm"><span class="ico">✅</span><span>入力確認</span></a>
+  <a href="detail.html" data-tab="detail"><span class="ico">📊</span><span>詳細確認</span></a>
+  <a href="ops.html" data-tab="ops"><span class="ico">🚕</span><span>出庫/帰庫</span></a>
+  <button type="button" id="tsmsMoreBtn"><span class="ico">⋯</span><span>その他</span></button>
+</nav>
+<div class="tsms-more-bg" id="tsmsMoreBg"></div>
 <div class="tsms-more-sheet" id="tsmsMoreSheet" aria-label="その他メニュー">
   <a href="index.html">TOP</a>
   <a href="sales.html">月間管理</a>
@@ -312,6 +331,39 @@ eBg"></div>
     });
   });
 })();
+</script>
+
+<script>
+  const SUPABASE_URL = "<YOUR_SUPABASE_URL>";
+  const SUPABASE_ANON_KEY = "<YOUR_ANON_KEY>";
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function signUpWithEmailPassword(email, password) {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return alert("サインアップ失敗: " + error.message);
+    alert("サインアップOK（ログインできるはず）");
+    console.log(data);
+  }
+
+  async function signInWithEmailPassword(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return alert("ログイン失敗: " + error.message);
+    alert("ログインOK");
+    console.log(data);
+  }
+
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (error) return alert("ログアウト失敗: " + error.message);
+    alert("ログアウトOK");
+  }
+
+  async function showSession() {
+    const { data } = await supabase.auth.getSession();
+    console.log("session:", data.session);
+    alert(data.session ? ("ログイン中: " + data.session.user.email) : "未ログイン");
+  }
 </script>
 
 </body>
