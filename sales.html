@@ -83,6 +83,7 @@
   .tsms-more-bg.show{opacity:1;pointer-events:auto;}
 </style>
 
+  <script type="module" src="auth-guard.js"></script>
 </head>
 <body>
 <nav class="tsms-menu" id="tsmsMenu" aria-label="サイドメニュー">
@@ -415,7 +416,7 @@
   menu.querySelectorAll("a").forEach((a)=>a.addEventListener("click", closeMenu));
 })();
 </script>
-<script>(function(){if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){window.addEventListener('load', function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}})();</script>
+<script>(function(){if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){window.addEventListener('load', function(){navigator.serviceWorker.register('./sw.js?v=20260215-1').catch(function(){});});}})();</script>
 
 <nav class="tsms-bottom-nav" aria-label="ボトムメニュー">
   <a href="report.html" data-tab="report"><span class="ico">📝</span><span>日報入力</span></a>
