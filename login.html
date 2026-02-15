@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ログイン</title>
+  <style>
+    :root{ --bg:#F3F6F8; --surface-1:#FFFFFF; --surface-2:#EEF3F6; --border:#D5DEE6; --text-primary:#0F1720; --text-secondary:#344554; --text-muted:#5B6D7C; --accent:#2580ED; --link:#187FBF; }
+    :root[data-theme="dark"]{ --bg:#0F1417; --surface-1:#151C20; --surface-2:#1B242A; --border:#2A353D; --text-primary:#E6EEF3; --text-secondary:#B7C4CC; --text-muted:#8A949A; --accent:#3B95F0; --link:#58C2FF; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text-primary);font-family:"Noto Sans JP",sans-serif;}
+    a{color:var(--link);}
+    .header{position:sticky;top:0;z-index:20;height:60px;display:flex;align-items:center;padding:0 14px;border-bottom:2px solid var(--border);background:var(--surface-1);font-weight:900;font-size:22px;}
+    .main{padding:12px;max-width:880px;margin:0 auto 90px;}
+    .section{border:2px solid var(--border);background:var(--surface-1);margin:10px 0;padding:10px;}
+    .title{font-weight:900;font-size:16px;margin:0 0 8px;}
+    .note{font-size:12px;color:var(--text-muted);line-height:1.4;margin:6px 0 10px;}
+    .field{display:grid;gap:6px;margin-bottom:10px;}
+    .label{font-size:13px;color:var(--text-muted);}
+    .input{width:100%;box-sizing:border-box;border:2px solid var(--border);padding:12px 10px;font-size:18px;background:var(--surface-2);color:var(--text-primary);}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .btn{appearance:none;border:2px solid var(--border);background:var(--surface-2);padding:12px 8px;font-size:16px;min-height:52px;font-weight:900;color:var(--text-primary);}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+    #authStatus{white-space:pre-wrap;font-size:13px;line-height:1.45;background:var(--surface-2);border:2px solid var(--border);padding:10px;}
+
+    body{padding-bottom:78px;}
+    .tsms-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:1200;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface-1);border-top:2px solid var(--border);padding-bottom:env(safe-area-inset-bottom);}
+    .tsms-bottom-nav a,.tsms-bottom-nav button{appearance:none;border:0;background:transparent;color:var(--text-secondary);font:inherit;font-size:11px;font-weight:900;padding:8px 2px 9px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;}
+    .tsms-bottom-nav .ico{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;color:#58C2FF;}
+    .tsms-bottom-nav .active{color:var(--text-primary);position:relative;}
+    .tsms-bottom-nav .active::before{content:"";position:absolute;top:0;left:14%;right:14%;height:2px;background:#58C2FF;}
+    .tsms-more-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1300;background:var(--surface-1);border-top:2px solid var(--border);transform:translateY(110%);transition:transform .2s ease;padding:12px 12px calc(12px + env(safe-area-inset-bottom));}
+    .tsms-more-sheet.show{transform:translateY(0);}
+    .tsms-more-sheet a{display:block;padding:12px;border:2px solid var(--border);margin-top:8px;text-decoration:none;color:var(--text-primary);background:var(--surface-2);font-weight:900;}
+    .tsms-more-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;z-index:1250;transition:opacity .2s;}
+    .tsms-more-bg.show{opacity:1;pointer-events:auto;}
+  </style>
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.json">
+  <script>(function(){try{var t=localStorage.getItem("tsms_theme")==="dark"?"dark":"light";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="dark"?"#0F1417":"#F3F6F8");}catch(e){}})();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="header">ログイン</header>
+
+<main class="main">
+  <section class="section">
+    <div class="title">Supabase認証</div>
+    <div class="note">settings.html で保存した Supabase URL / Anon Key を優先して使用します。未設定時はこのページ内のプレースホルダーを編集してください。</div>
+
+    <div class="field"><div class="label">メールアドレス</div><input id="email" class="input" inputmode="email" placeholder="name@example.com"></div>
+    <div class="field"><div class="label">パスワード</div><input id="password" class="input" type="password" placeholder="8文字以上推奨"></div>
+
+    <div class="actions" style="margin-bottom:8px;">
+      <button class="btn" id="btnSignUp" type="button">新規登録</button>
+      <button class="btn primary" id="btnSignIn" type="button">ログイン</button>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btnShowSession" type="button">状態確認</button>
+      <button class="btn" id="btnSignOut" type="button">ログアウト</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="title">ステータス</div>
+    <div id="authStatus">未初期化</div>
+  </section>
+</main>
+
+<nav class="tsms-bottom-nav" aria-label="ボトムメニュー">
+  <a href="report.html" data-tab="report"><span class="ico">📝</span><span>日報入力</span></a>
+  <a href="confirm.html" data-tab="confirm"><span class="ico">✅</span><span>入力確認</span></a>
+  <a href="detail.html" data-tab="detail"><span class="ico">📊</span><span>詳細確認</span></a>
+  <a href="ops.html" data-tab="ops"><span class="ico">🚕</span><span>出庫/帰庫</span></a>
+  <button type="button" id="tsmsMoreBtn"><span class="ico">⋯</span><span>その他</span></button>
+</nav>
+<div class="tsms-more-bg" id="tsmsMoreBg"></div>
+<div class="tsms-more-sheet" id="tsmsMoreSheet" aria-label="その他メニュー">
+  <a href="index.html">TOP</a>
+  <a href="sales.html">月間管理</a>
+  <a href="settings.html">設定</a>
+  <a href="login.html">ログイン</a>
+</div>
+
+<script>
+(function(){
+  const CONFIG_KEY = "tsms_supabase_config";
+  const FALLBACK_URL = "<YOUR_SUPABASE_URL>";
+  const FALLBACK_ANON_KEY = "<YOUR_ANON_KEY>";
+  const statusEl = document.getElementById("authStatus");
+
+  function setStatus(text){
+    statusEl.textContent = text;
+  }
+
+  function readConfig(){
+    try{
+      const cfg = JSON.parse(localStorage.getItem(CONFIG_KEY) || "null") || {};
+      const url = String(cfg.url || "").trim() || FALLBACK_URL;
+      const anonKey = String(cfg.anonKey || "").trim() || FALLBACK_ANON_KEY;
+      return { url, anonKey };
+    }catch(_){
+      return { url: FALLBACK_URL, anonKey: FALLBACK_ANON_KEY };
+    }
+  }
+
+  const cfg = readConfig();
+  if(!window.supabase || !window.supabase.createClient){
+    setStatus("Supabase SDKの読み込みに失敗しました");
+    return;
+  }
+  if(!cfg.url || cfg.url.includes("<YOUR_SUPABASE_URL>") || !cfg.anonKey || cfg.anonKey.includes("<YOUR_ANON_KEY>")){
+    setStatus("Supabase設定が未完了です。settings.html でURL/Anon Keyを保存するか、このページのプレースホルダーを置換してください。");
+    return;
+  }
+
+  const supabase = window.supabase.createClient(cfg.url, cfg.anonKey);
+
+  async function showSessionStatus(){
+    const { data, error } = await supabase.auth.getSession();
+    if(error){
+      setStatus("セッション取得失敗: " + error.message);
+      return;
+    }
+    if(data.session){
+      setStatus("ログイン中: " + data.session.user.email);
+    }else{
+      setStatus("未ログイン");
+    }
+  }
+
+  async function signUpWithEmailPassword(){
+    const email = (document.getElementById("email").value || "").trim();
+    const password = (document.getElementById("password").value || "").trim();
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: location.origin + "/auth-callback.html" }
+    });
+    if(error){ alert("サインアップ失敗: " + error.message); return; }
+    alert("サインアップOK（確認メールを送信しました）");
+    await showSessionStatus();
+  }
+
+  async function signInWithEmailPassword(){
+    const email = (document.getElementById("email").value || "").trim();
+    const password = (document.getElementById("password").value || "").trim();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error){ alert("ログイン失敗: " + error.message); return; }
+    alert("ログインOK");
+    await showSessionStatus();
+  }
+
+  async function signOut(){
+    const { error } = await supabase.auth.signOut();
+    if(error){ alert("ログアウト失敗: " + error.message); return; }
+    alert("ログアウトOK");
+    await showSessionStatus();
+  }
+
+  document.getElementById("btnSignUp").addEventListener("click", signUpWithEmailPassword);
+  document.getElementById("btnSignIn").addEventListener("click", signInWithEmailPassword);
+  document.getElementById("btnSignOut").addEventListener("click", signOut);
+  document.getElementById("btnShowSession").addEventListener("click", showSessionStatus);
+  showSessionStatus();
+})();
+</script>
+
+<script>
+(function(){
+  var page=(location.pathname.split('/').pop()||'index.html').replace('.html','');
+  document.querySelectorAll('.tsms-bottom-nav [data-tab]').forEach(function(a){ if(a.getAttribute('data-tab')===page) a.classList.add('active'); });
+  var btn=document.getElementById('tsmsMoreBtn');
+  var bg=document.getElementById('tsmsMoreBg');
+  var sheet=document.getElementById('tsmsMoreSheet');
+  function closeMore(){sheet.classList.remove('show');bg.classList.remove('show');}
+  if(btn&&bg&&sheet){btn.addEventListener('click',function(){sheet.classList.add('show');bg.classList.add('show');});bg.addEventListener('click',closeMore);}  
+})();
+</script>
+</body>
+</html>
